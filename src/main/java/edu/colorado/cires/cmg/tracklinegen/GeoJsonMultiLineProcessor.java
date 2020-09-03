@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -22,9 +23,10 @@ public class GeoJsonMultiLineProcessor {
   }
 
 
-  public void process(JsonParser jsonParser, OutputStream out, OutputStream wktOut) throws ValidationException {
+  public void process(InputStream in, OutputStream out, OutputStream wktOut) throws ValidationException {
     GeoJsonMultiLineParser parser = new GeoJsonMultiLineParser(objectMapper, geoJsonPrecision, maxAllowedSpeedKnts);
     try (
+        JsonParser jsonParser = getJsonParser(in);
         JsonGenerator jsonGenerator = getGenerator(out);
         Writer wktWriter = new OutputStreamWriter(wktOut, StandardCharsets.UTF_8)) {
 
@@ -40,6 +42,14 @@ public class GeoJsonMultiLineProcessor {
       return objectMapper.getFactory().createGenerator(out);
     } catch (IOException e) {
       throw new RuntimeException("Unable to create JSON generator", e);
+    }
+  }
+
+  private JsonParser getJsonParser(InputStream in){
+    try {
+      return objectMapper.getFactory().createParser(in);
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to create JSON parser", e);
     }
   }
 }
