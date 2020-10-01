@@ -233,6 +233,7 @@ public class GeoJsonMultiLineParser {
   private double getSpeed(Coordinate c1, Coordinate c2, double m) throws ValidationException {
     double s = (c2.getZ() - c1.getZ()) / 1000D;
     double metersPerSecond = m / s;
+
     double knots = mpsToKnots(metersPerSecond);
     if (maxAllowedSpeedKnts > 0 && knots > maxAllowedSpeedKnts) {
       throw new ValidationException(

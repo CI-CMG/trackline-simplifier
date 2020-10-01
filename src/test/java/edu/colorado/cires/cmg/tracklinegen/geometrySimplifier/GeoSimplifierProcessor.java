@@ -2,12 +2,9 @@ package edu.colorado.cires.cmg.tracklinegen.geometrySimplifier;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.colorado.cires.cmg.tracklinegen.DataRow;
-import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineWriter;
 import edu.colorado.cires.cmg.tracklinegen.GeometrySimplifier;
 import edu.colorado.cires.cmg.tracklinegen.TracklineProcessor;
-import java.io.Closeable;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

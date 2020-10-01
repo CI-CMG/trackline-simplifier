@@ -6,13 +6,6 @@ import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineWriter;
 import edu.colorado.cires.cmg.tracklinegen.GeometrySimplifier;
 import java.util.function.Predicate;
 
-class FilterRow implements Predicate<DataRow>{
-
-  @Override
-  public boolean test(DataRow dataRow) {
-    return true;
-  }
-}
 public class GsBaseRowListener extends BaseRowListener<DataRow> {
 
   public GsBaseRowListener(long msSplit, GeometrySimplifier geometrySimplifier,

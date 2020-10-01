@@ -1,5 +1,6 @@
 package edu.colorado.cires.cmg.tracklinegen.geometrySimplifier;
 
+import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.GeoDataRow;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.time.Instant;
@@ -36,10 +37,11 @@ public class BufferReaderIterator implements Iterator {
   }
 
   private GeoDataRow apply(String line){
-    String [] tokens = line.split("\t");
+    String [] tokens = line.split(",");
     LocalDateTime dateTime = LocalDateTime.parse(tokens[0], DateTimeFormatter.ofPattern("yyyy MM dd HH mm ss.SSSSSS"));
     Instant timeStamp = dateTime.toInstant(ZoneOffset.UTC);
-    return new GeoDataRow(timeStamp, Double.valueOf(tokens[2]), Double.valueOf(tokens[3]));
+//    return new GeoDataRow(timeStamp, Double.valueOf(tokens[2]), Double.valueOf(tokens[3]));
+    return new GeoDataRow(timeStamp, Double.valueOf(tokens[1]), Double.valueOf(tokens[2]));
   }
 
   @Override
