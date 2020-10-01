@@ -1,0 +1,21 @@
+{
+  "type": "Feature",
+  "geometry": {
+    "type": "MultiLineString",
+    "coordinates": [
+      [
+        [-175, 5, 9656160000],
+        [-177, 3, 9662640000],
+        [-179, 1, 9663660000],
+        [180, 0, 14696694000],
+        [178, -3, 14700270000],
+        [176, -5, 14700270001]
+      ]
+    ]
+  },
+  "properties": {
+    "simplifiedPointCount": 7,
+    "unsimplifiedPointCount": 23,
+    "targetPointCount": 22
+  }
+}
