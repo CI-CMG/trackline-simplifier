@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.referencing.datum.DefaultEllipsoid;
 import org.locationtech.jts.geom.Coordinate;
@@ -105,6 +107,11 @@ public class GeoJsonMultiLineParser {
   }
 
   public void parse(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter) throws IOException, ValidationException {
+    parse(jsonParser, jsonGenerator, wktWriter, null);
+  }
+
+  public void parse(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter, Map<String, Object> additionalProperties) throws IOException, ValidationException {
+
     jsonParser.nextToken();
     jsonGenerator.copyCurrentEvent(jsonParser); //start object
     if (jsonParser.getCurrentToken() != JsonToken.START_OBJECT) {
@@ -138,10 +145,17 @@ public class GeoJsonMultiLineParser {
       properties = GeometryProperties.Builder.configure().build();
     }
 
-    properties = GeometryProperties.Builder.configure(properties)
+    GeometryProperties.Builder propertiesBuilder = GeometryProperties.Builder.configure(properties)
         .withDistanceM(distanceM)
-        .withAvgSpeedMPS(avgSpeedM)
-        .build();
+        .withAvgSpeedMPS(avgSpeedM);
+
+    if (additionalProperties != null) {
+      for(Entry<String, Object> entry : additionalProperties.entrySet()) {
+        propertiesBuilder.withOtherField(entry.getKey(), entry.getValue());
+      }
+    }
+
+    properties = propertiesBuilder.build();
 
     jsonGenerator.writeFieldName("properties");
     objectMapper.writeValue(jsonGenerator, properties);

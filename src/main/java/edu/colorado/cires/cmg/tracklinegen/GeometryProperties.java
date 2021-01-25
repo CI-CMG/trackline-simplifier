@@ -109,7 +109,7 @@ public class GeometryProperties {
     }
 
     @JsonAnySetter
-    private Builder withOtherField(String name, Object value) {
+    public Builder withOtherField(String name, Object value) {
       this.otherFields.put(name, value);
       return this;
     }

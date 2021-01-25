@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class GeoJsonMultiLineProcessor {
 
@@ -22,19 +23,22 @@ public class GeoJsonMultiLineProcessor {
     this.maxAllowedSpeedKnts = maxAllowedSpeedKnts;
   }
 
-
-  public void process(InputStream in, OutputStream out, OutputStream wktOut) throws ValidationException {
+  public void process(InputStream in, OutputStream out, OutputStream wktOut, Map<String, Object> additionalProperties) throws ValidationException {
     GeoJsonMultiLineParser parser = new GeoJsonMultiLineParser(objectMapper, geoJsonPrecision, maxAllowedSpeedKnts);
     try (
         JsonParser jsonParser = getJsonParser(in);
         JsonGenerator jsonGenerator = getGenerator(out);
         Writer wktWriter = new OutputStreamWriter(wktOut, StandardCharsets.UTF_8)) {
 
-      parser.parse(jsonParser, jsonGenerator, wktWriter);
+      parser.parse(jsonParser, jsonGenerator, wktWriter, additionalProperties);
 
     } catch (IOException e) {
       throw new RuntimeException("Unable to process geometry", e);
     }
+  }
+
+  public void process(InputStream in, OutputStream out, OutputStream wktOut) throws ValidationException {
+    process(in, out, wktOut, null);
   }
 
   private JsonGenerator getGenerator(OutputStream out) {
