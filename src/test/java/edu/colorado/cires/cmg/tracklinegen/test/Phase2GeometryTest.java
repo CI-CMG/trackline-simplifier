@@ -190,7 +190,7 @@ public class Phase2GeometryTest {
     });
 
     Assertions.assertEquals(
-        "Speed from (-157.892060,21.271820) to (-157.916370,21.142970) was 11.447975 knots, which exceeded allowed maximum of 11.447974 knots",
+        "At time stamp 9664740000.000000 to 9667200000.000000: Speed from (-157.892060,21.271820) to (-157.916370,21.142970) was 11.447975 knots, which exceeded allowed maximum of 11.447974 knots",
         exception.getMessage());
 
   }

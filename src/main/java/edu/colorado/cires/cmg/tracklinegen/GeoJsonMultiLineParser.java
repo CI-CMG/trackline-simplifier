@@ -251,7 +251,8 @@ public class GeoJsonMultiLineParser {
     double knots = mpsToKnots(metersPerSecond);
     if (maxAllowedSpeedKnts > 0 && knots > maxAllowedSpeedKnts) {
       throw new ValidationException(
-          String.format("Speed from (%f,%f) to (%f,%f) was %f knots, which exceeded allowed maximum of %f knots",
+          String.format("At time stamp %f to %f: Speed from (%f,%f) to (%f,%f) was %f knots, which exceeded allowed maximum of %f knots",
+              c1.getZ(), c2.getZ(),
               c1.getX(), c1.getY(),
               c2.getX(), c2.getY(),
               knots,
