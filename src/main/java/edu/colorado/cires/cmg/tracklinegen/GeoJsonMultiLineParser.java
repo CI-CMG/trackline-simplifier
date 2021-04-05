@@ -403,7 +403,8 @@ public class GeoJsonMultiLineParser {
           split.add(l1.getCoordinateN(0));
           split.add(l1.getCoordinateN(1));
         } else {
-          throw new IllegalStateException("Unable to determine AM split order: " + geometry);
+          throw new IllegalStateException("Unable to determine AM split order: " + geometry + " coordinate: " +
+              coordinate + " last: " + last + " L1: " + l1 + " l2: " + l2);
         }
       } else {
         throw new IllegalStateException("An error occurred splitting AM, type: " + geometry.getClass().getSimpleName());
