@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -251,10 +252,9 @@ public class GeoJsonMultiLineParser {
     double knots = mpsToKnots(metersPerSecond);
     if (maxAllowedSpeedKnts > 0 && knots > maxAllowedSpeedKnts) {
       throw new ValidationException(
-          String.format("At time stamp %f to %f: Speed from (%f,%f) to (%f,%f) was %f knots, which exceeded allowed maximum of %f knots",
-              c1.getZ(), c2.getZ(),
-              c1.getX(), c1.getY(),
-              c2.getX(), c2.getY(),
+          String.format("Speed from (%f, %f, %s) to (%f, %f, %s) was %f knots, which exceeded allowed maximum of %f knots",
+              c1.getX(), c1.getY(), Instant.ofEpochMilli((long) c1.getZ()),
+              c2.getX(), c2.getY(), Instant.ofEpochMilli((long)c2.getZ()),
               knots,
               maxAllowedSpeedKnts
           ));

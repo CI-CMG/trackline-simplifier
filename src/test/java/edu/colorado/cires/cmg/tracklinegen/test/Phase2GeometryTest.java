@@ -17,19 +17,29 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class Phase2GeometryTest {
+
   private final ObjectMapper objectMapper = ObjectMapperCreator.create();
 
   @Test
-  public void testPointOnAm() throws Exception{
+  public void testPointOnAm() throws Exception {
     String baseDir = "target/test-classes/phase2/testPointOnAm/";
     String actualDir = baseDir + "actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
 
@@ -46,7 +56,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected,actual);
+    assertEquals(expected, actual);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
@@ -57,8 +67,8 @@ public class Phase2GeometryTest {
   public void testMultiPointOnAm() throws Exception {
     String baseDir = "target/test-classes/phase2/testMultiPointOnAm/";
     String actualDir = baseDir + "actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
 
@@ -75,7 +85,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected,actual);
+    assertEquals(expected, actual);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
@@ -86,8 +96,8 @@ public class Phase2GeometryTest {
   public void testCrossing() throws Exception {
     String baseDir = "target/test-classes/phase2/testBoxCrossing/";
     String actualDir = baseDir + "actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
 
@@ -104,18 +114,19 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected,actual);
+    assertEquals(expected, actual);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
     assertEquals(wktExpected.readLine(), wktActual.readLine());
   }
+
   @Test
   public void testNotCrossing() throws Exception {
     String baseDir = "target/test-classes/phase2/testBoxNotCrossing/";
     String actualDir = baseDir + "actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
 
@@ -132,7 +143,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected,actual);
+    assertEquals(expected, actual);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
@@ -143,8 +154,8 @@ public class Phase2GeometryTest {
   public void testOutofOrder() throws Exception {
     String baseDir = "target/test-classes/phase2/test1/";
     String actualDir = baseDir + "actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
 
@@ -161,18 +172,19 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected,actual);
+    assertEquals(expected, actual);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
     assertEquals(wktExpected.readLine(), wktActual.readLine());
   }
+
   @Test
-  public void testMaxSpeed(){
+  public void testMaxSpeed() {
     String baseDir = "target/test-classes/phase2/test1/";
     String actualDir = baseDir + "actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
 
@@ -184,13 +196,12 @@ public class Phase2GeometryTest {
     GeoJsonProcessor geoJsonProcessor = new GeoJsonProcessor(gsf, Paths.get(geoJsonFile), Paths.get(wktFile),
         objectMapper, geoJsonPrecision, maxAllowedSpeedKnts);
 
-
     ValidationRuntimeException exception = assertThrows(ValidationRuntimeException.class, () -> {
       geoJsonProcessor.process();
     });
 
     Assertions.assertEquals(
-        "At time stamp 9664740000.000000 to 9667200000.000000: Speed from (-157.892060,21.271820) to (-157.916370,21.142970) was 11.447975 knots, which exceeded allowed maximum of 11.447974 knots",
+        "Speed from (-157.892060, 21.271820, 1970-04-22T20:39:00Z) to (-157.916370, 21.142970, 1970-04-22T21:20:00Z) was 11.447975 knots, which exceeded allowed maximum of 11.447974 knots",
         exception.getMessage());
 
   }
