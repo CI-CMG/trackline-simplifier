@@ -408,8 +408,12 @@ public class GeoJsonMultiLineParser {
               " coordinate: " + coordinate + " last: " + last + " L1: " + l1 + " l2: " + l2);
         }
       } else {
-        throw new IllegalStateException("An error occurred splitting AM, type: " + geometry.getClass().getSimpleName() +
-            " coordinate: " + coordinate + " last: " + last);
+        throw new IllegalStateException(
+            String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
+                geometry.getClass().getSimpleName(),
+                coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long)coordinate.getZ()),
+                last.getX(), last.getY(), Instant.ofEpochMilli((long)last.getZ())
+            ));
       }
     } else {
       split = Collections.singletonList(coordinate);
