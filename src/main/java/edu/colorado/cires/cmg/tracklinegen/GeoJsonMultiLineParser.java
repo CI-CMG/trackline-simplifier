@@ -409,7 +409,7 @@ public class GeoJsonMultiLineParser {
         }
       } else {
         throw new IllegalStateException(
-            String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
+            String.format("test: An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
                 geometry.getClass().getSimpleName(),
                 coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long)coordinate.getZ()),
                 last.getX(), last.getY(), Instant.ofEpochMilli((long)last.getZ())
