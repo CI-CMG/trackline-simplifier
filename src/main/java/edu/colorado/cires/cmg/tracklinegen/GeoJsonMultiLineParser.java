@@ -28,9 +28,11 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
 import org.locationtech.spatial4j.shape.jts.JtsGeometry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GeoJsonMultiLineParser {
-
+  private static final Logger LOGGER = LoggerFactory.getLogger(GeoJsonMultiLineParser.class);
   private static final double METERS_PER_NMILE = 1852D;
   private static final double SECONDS_PER_HOUR = 3600D;
   private static final double KN_PER_MPS = SECONDS_PER_HOUR / METERS_PER_NMILE;
@@ -387,6 +389,7 @@ public class GeoJsonMultiLineParser {
     if ((coordinate.getX() < 0 && last.getX() > 0) || (coordinate.getX() > 0 && last.getX() < 0)) {
       LineString lineString = geometryFactory.createLineString(new Coordinate[]{last, coordinate});
       Geometry geometry = new JtsGeometry(lineString, JtsSpatialContext.GEO, true, true).getGeom();
+
       if (geometry instanceof LineString) {
         return Collections.singletonList(coordinate);
       } else if (geometry instanceof MultiLineString) {
@@ -409,10 +412,11 @@ public class GeoJsonMultiLineParser {
         }
       } else {
         throw new IllegalStateException(
-            String.format("test: An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
+            String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s) Geometry: %s",
                 geometry.getClass().getSimpleName(),
                 coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long)coordinate.getZ()),
-                last.getX(), last.getY(), Instant.ofEpochMilli((long)last.getZ())
+                last.getX(), last.getY(), Instant.ofEpochMilli((long)last.getZ()),
+                geometry.toString()
             ));
       }
     } else {
