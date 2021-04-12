@@ -76,4 +76,22 @@ public class GeoJsonMultiLineParserTest {
 
   }
 
+//  @Test
+//  public void testStopOnAntimeridian() throws Exception {
+//    ByteArrayOutputStream out = new ByteArrayOutputStream();
+//    ByteArrayOutputStream wktOut = new ByteArrayOutputStream();
+//    JsonNode expected;
+//    try (JsonParser jsonParser = objectMapper.getFactory().createParser(getClass().getClassLoader().getResourceAsStream("am/am3.json"));
+//        JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out);
+//        PrintWriter wktWriter = new PrintWriter(wktOut);
+//        InputStream expIn = getClass().getClassLoader().getResourceAsStream("am/am3-expected.json")
+//    ) {
+//      expected = objectMapper.readTree(expIn);
+//      GeoJsonMultiLineParser parser = new GeoJsonMultiLineParser(objectMapper, 4, 0D);
+//      parser.parse(jsonParser, jsonGenerator, wktWriter);
+//    }
+//
+//    JsonNode split = objectMapper.readTree(out.toByteArray());
+//    assertEquals(expected, split);
+//  }
 }
