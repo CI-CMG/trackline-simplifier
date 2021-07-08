@@ -14,6 +14,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private final Predicate<T> filterRow;
   private final GeoJsonMultiLineWriter lineWriter;
   private final int batchSize;
+  private final long maxAllowedSimplifiedPoints;
 
   private List<Coordinate> confirmedLineString;
   private List<Coordinate> potentialLineString;
@@ -29,12 +30,23 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter,
       int batchSize,
-      Predicate<T> filterRow) {
+      Predicate<T> filterRow,
+      long maxAllowedSimplifiedPoints) {
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
     this.lineWriter = lineWriter;
     this.filterRow = filterRow;
     this.batchSize = batchSize;
+    this.maxAllowedSimplifiedPoints = maxAllowedSimplifiedPoints;
+  }
+
+  public BaseRowListener(
+      long msSplit,
+      GeometrySimplifier geometrySimplifier,
+      GeoJsonMultiLineWriter lineWriter,
+      int batchSize,
+      Predicate<T> filterRow) {
+    this(msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, 0);
   }
 
   @Override
@@ -66,7 +78,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       if (confirmedLineString.size() >= 2) {
         writeConfirmed();
       } else if (confirmedLineString.size() == 1) {
-        simplifiedPointCount++;
+        incrementSimplifiedPointCount();
         unsimplifiedPointCount++;
         writeCoordinate(confirmedLineString.get(0));
       }
@@ -133,12 +145,21 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     lineWriter.writeCoordinate(args);
   }
 
+  private void incrementSimplifiedPointCount() {
+    simplifiedPointCount++;
+    if (maxAllowedSimplifiedPoints > 0 && simplifiedPointCount > maxAllowedSimplifiedPoints) {
+      throw new SimplifiedPointCountExceededException(
+          "Simplified point count exceeded: allowed = " + maxAllowedSimplifiedPoints + " batched points = " + simplifiedPointCount
+      );
+    }
+  }
+
   private void writeConfirmed() {
     unsimplifiedPointCount += confirmedLineString.size();
     LineString simplified = simplify(confirmedLineString);
     maybeStartLine();
     for (Coordinate coordinate : simplified.getCoordinateSequence().toCoordinateArray()) {
-      simplifiedPointCount++;
+      incrementSimplifiedPointCount();
       writeCoordinate(coordinate);
     }
     confirmedLineString = new LinkedList<>();

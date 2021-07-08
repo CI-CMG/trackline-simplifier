@@ -17,9 +17,10 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
   private Path fnvFile;
   private ObjectMapper objectMapper;
   private Path gsf;
+  private long maxCount;
 
   public GeoSimplifierProcessor(int geoJsonPrecision, long msSplit, GeometrySimplifier geometrySimplifier, int simplifierBatchSize,
-      Path fnvFile, ObjectMapper objectMapper, Path gsf) {
+      Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount) {
     this.geoJsonPrecision = geoJsonPrecision;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
@@ -27,6 +28,7 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
     this.fnvFile = fnvFile;
     this.objectMapper = objectMapper;
     this.gsf = gsf;
+    this.maxCount = maxCount;
   }
 
   @Override
@@ -36,7 +38,7 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
 
   @Override
   protected List<GsBaseRowListener> createRowListeners(GeoSimplifierContext context) {
-    return Collections.singletonList(new GsBaseRowListener(msSplit, geometrySimplifier, context.getLineWriter(), simplifierBatchSize));
+    return Collections.singletonList(new GsBaseRowListener(msSplit, geometrySimplifier, context.getLineWriter(), simplifierBatchSize, maxCount));
   }
 
   @Override
