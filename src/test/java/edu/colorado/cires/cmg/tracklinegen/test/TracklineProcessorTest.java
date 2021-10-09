@@ -12,9 +12,12 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 
 public class TracklineProcessorTest {
   private final ObjectMapper objectMapper = new ObjectMapper();
+  private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
   @Test
   public void test() throws Exception {
@@ -36,7 +39,7 @@ public class TracklineProcessorTest {
     String gsf = actualDir + "/geoSimplfied.json";
 
     GeoSimplifierProcessor tracklineProcessor = new GeoSimplifierProcessor(geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize,
-        dataFile, objectMapper, Paths.get(gsf), maxCount);
+        dataFile, objectMapper, Paths.get(gsf), maxCount, simplificationTolerance, geometryFactory);
 
     tracklineProcessor.process();
 
@@ -65,7 +68,7 @@ public class TracklineProcessorTest {
     String gsf = actualDir + "/geoSimplfied.json";
 
     GeoSimplifierProcessor tracklineProcessor = new GeoSimplifierProcessor(geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize,
-        dataFile, objectMapper, Paths.get(gsf), maxCount);
+        dataFile, objectMapper, Paths.get(gsf), maxCount, simplificationTolerance, geometryFactory);
 
     SimplifiedPointCountExceededException ex = assertThrows(SimplifiedPointCountExceededException.class, () -> tracklineProcessor.process());
 

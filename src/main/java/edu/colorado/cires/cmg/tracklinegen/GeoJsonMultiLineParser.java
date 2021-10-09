@@ -26,7 +26,6 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
 import org.locationtech.spatial4j.shape.jts.JtsGeometry;
@@ -34,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GeoJsonMultiLineParser {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(GeoJsonMultiLineParser.class);
   private static final double METERS_PER_NMILE = 1852D;
   private static final double SECONDS_PER_HOUR = 3600D;
@@ -115,7 +115,8 @@ public class GeoJsonMultiLineParser {
     parse(jsonParser, jsonGenerator, wktWriter, null);
   }
 
-  public void parse(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter, Map<String, Object> additionalProperties) throws IOException, ValidationException {
+  public void parse(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter, Map<String, Object> additionalProperties)
+      throws IOException, ValidationException {
 
     jsonParser.nextToken();
     jsonGenerator.copyCurrentEvent(jsonParser); //start object
@@ -155,7 +156,7 @@ public class GeoJsonMultiLineParser {
         .withAvgSpeedMPS(avgSpeedM);
 
     if (additionalProperties != null) {
-      for(Entry<String, Object> entry : additionalProperties.entrySet()) {
+      for (Entry<String, Object> entry : additionalProperties.entrySet()) {
         propertiesBuilder.withOtherField(entry.getKey(), entry.getValue());
       }
     }
@@ -175,14 +176,20 @@ public class GeoJsonMultiLineParser {
     if (jsonParser.getCurrentToken() != JsonToken.START_OBJECT) {
       throw new IllegalArgumentException("Geometry was not an object");
     }
-    wktWriter.write("MULTILINESTRING ");
+
+    String featureType = null;
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       jsonGenerator.copyCurrentEvent(jsonParser);
       String fieldName = jsonParser.getCurrentName();
       if ("type".equals(fieldName)) {
-        verifyFeatureType(jsonParser, jsonGenerator, "MultiLineString");
+        featureType = verifyFeatureType(jsonParser, jsonGenerator, "MultiLineString", "Point");
+        if (featureType.equals("MultiLineString")) {
+          wktWriter.write("MULTILINESTRING ");
+        } else {
+          wktWriter.write("POINT ");
+        }
       } else if ("coordinates".equals(fieldName)) {
-        processCoordinates(jsonParser, jsonGenerator, wktWriter);
+        processCoordinates(jsonParser, jsonGenerator, wktWriter, featureType);
         writeBBox(jsonGenerator);
       } else {
         copyEverythingElse(jsonParser, jsonGenerator);
@@ -191,23 +198,33 @@ public class GeoJsonMultiLineParser {
     jsonGenerator.copyCurrentEvent(jsonParser); //end object
   }
 
-  private void processCoordinates(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter) throws IOException, ValidationException {
-    long lineStringCounter = 0;
-    jsonParser.nextToken();
-    jsonGenerator.copyCurrentEvent(jsonParser); //start array
-    wktWriter.write("("); //start multi line string
-    if (jsonParser.getCurrentToken() != JsonToken.START_ARRAY) {
-      throw new IllegalArgumentException("coordinates was not an array");
-    }
-    while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-      if (lineStringCounter > 0) {
-        wktWriter.write(","); //line string separator
+  private void processCoordinates(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter, String type)
+      throws IOException, ValidationException {
+    if (type.equals("MultiLineString")) {
+      long lineStringCounter = 0;
+      jsonParser.nextToken();
+      jsonGenerator.copyCurrentEvent(jsonParser); //start array
+      wktWriter.write("("); //start multi line string
+      if (jsonParser.getCurrentToken() != JsonToken.START_ARRAY) {
+        throw new IllegalArgumentException("coordinates was not an array");
       }
-      processLineString(jsonParser, jsonGenerator, wktWriter);
-      lineStringCounter++;
+      while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
+        if (lineStringCounter > 0) {
+          wktWriter.write(","); //line string separator
+        }
+        processLineString(jsonParser, jsonGenerator, wktWriter);
+        lineStringCounter++;
+      }
+      jsonGenerator.copyCurrentEvent(jsonParser); //end array
+      wktWriter.write(")"); // end multi line string
+    } else if (type.equals("Point")) {
+      jsonParser.nextToken();
+      wktWriter.write("(");
+      processCoordinate(jsonParser, jsonGenerator, wktWriter);
+      wktWriter.write(" )");
+    } else {
+      throw new IllegalStateException("Unsupported type: " + type);
     }
-    jsonGenerator.copyCurrentEvent(jsonParser); //end array
-    wktWriter.write(")"); // end multi line string
   }
 
   private Coordinate arrayToCoordinate(List<Double> coordArray) {
@@ -258,7 +275,7 @@ public class GeoJsonMultiLineParser {
       throw new ValidationException(
           String.format("Speed from (%f, %f, %s) to (%f, %f, %s) was %f knots, which exceeded allowed maximum of %f knots",
               c1.getX(), c1.getY(), Instant.ofEpochMilli((long) c1.getZ()),
-              c2.getX(), c2.getY(), Instant.ofEpochMilli((long)c2.getZ()),
+              c2.getX(), c2.getY(), Instant.ofEpochMilli((long) c2.getZ()),
               knots,
               maxAllowedSpeedKnts
           ));
@@ -320,51 +337,55 @@ public class GeoJsonMultiLineParser {
 //    jsonGenerator.writeArray(doubleArray, 0, 4);
   }
 
+  private void processCoordinate(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter) throws IOException, ValidationException {
+    List<Double> coordArray = objectMapper.readValue(jsonParser, LIST_DOUBLE);
+    Coordinate coordinate = arrayToCoordinate(coordArray);
+
+    if (lastCoordinate == null) {
+      writeArray(jsonGenerator, wktWriter, coordArray);
+      if (absoluteLastCoordinate != null) {
+        List<Coordinate> split = splitAm(coordinate, absoluteLastCoordinate);
+        if (split.size() > 1) {
+          crossedAntimeridian = true;
+        }
+      }
+    } else {
+      List<Coordinate> split = splitAm(coordinate, lastCoordinate);
+      if (split.size() == 1) {
+        wktWriter.write(","); //coordinate separator
+        writeArray(jsonGenerator, wktWriter, coordArray);
+        double m = getDistance(lastCoordinate, split.get(0));
+        double v = getSpeed(lastCoordinate, split.get(0), m);
+        updateStats(m, v);
+      } else {
+        crossedAntimeridian = true;
+        wktWriter.write(","); //coordinate separator
+        writeArray(jsonGenerator, wktWriter, split.get(1));
+        jsonGenerator.writeEndArray();
+        jsonGenerator.writeStartArray();
+        wktWriter.write("), ("); //coordinate separator // TODO: if split size == 3
+        writeArray(jsonGenerator, wktWriter, split.get(2));
+        // TODO - if split size == 3 and coordinate is the very last coordinate will result in a lineString with a single point
+        if (split.size() == 4) {
+          wktWriter.write(","); //coordinate separator
+          writeArray(jsonGenerator, wktWriter, split.get(3));
+          double m = getDistance(split.get(0), split.get(1));
+          m += getDistance(split.get(2), split.get(3));
+          double v = getSpeed(lastCoordinate, split.get(3), m);
+          updateStats(m, v);
+        }
+      }
+    }
+    processBoundingBox(coordinate);
+    updateLastCoordinate(coordinate);
+  }
+
   private void processLineString(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter) throws IOException, ValidationException {
     jsonGenerator.copyCurrentEvent(jsonParser); //start array
     wktWriter.write("("); //start line string
     resetLastCoordinate();
     while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
-      List<Double> coordArray = objectMapper.readValue(jsonParser, LIST_DOUBLE);
-      Coordinate coordinate = arrayToCoordinate(coordArray);
-
-      if (lastCoordinate == null) {
-        writeArray(jsonGenerator, wktWriter, coordArray);
-        if (absoluteLastCoordinate != null) {
-          List<Coordinate> split = splitAm(coordinate, absoluteLastCoordinate);
-          if (split.size() > 1) {
-            crossedAntimeridian = true;
-          }
-        }
-      } else {
-        List<Coordinate> split = splitAm(coordinate, lastCoordinate);
-        if (split.size() == 1) {
-          wktWriter.write(","); //coordinate separator
-          writeArray(jsonGenerator, wktWriter, coordArray);
-          double m = getDistance(lastCoordinate, split.get(0));
-          double v = getSpeed(lastCoordinate, split.get(0), m);
-          updateStats(m, v);
-        } else {
-          crossedAntimeridian = true;
-          wktWriter.write(","); //coordinate separator
-          writeArray(jsonGenerator, wktWriter, split.get(1));
-          jsonGenerator.writeEndArray();
-          jsonGenerator.writeStartArray();
-          wktWriter.write("), ("); //coordinate separator // TODO: if split size == 3
-          writeArray(jsonGenerator, wktWriter, split.get(2));
-          // TODO - if split size == 3 and coordinate is the very last coordinate will result in a lineString with a single point
-          if (split.size() == 4) {
-            wktWriter.write(","); //coordinate separator
-            writeArray(jsonGenerator, wktWriter, split.get(3));
-            double m = getDistance(split.get(0), split.get(1));
-            m += getDistance(split.get(2), split.get(3));
-            double v = getSpeed(lastCoordinate, split.get(3), m);
-            updateStats(m, v);
-          }
-        }
-      }
-      processBoundingBox(coordinate);
-      updateLastCoordinate(coordinate);
+      processCoordinate(jsonParser, jsonGenerator, wktWriter);
     }
     jsonGenerator.copyCurrentEvent(jsonParser); //end array
     wktWriter.write(")"); //end line string
@@ -398,8 +419,8 @@ public class GeoJsonMultiLineParser {
         throw new IllegalStateException(
             String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
                 geometry.toString(),
-                coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long)coordinate.getZ()),
-                last.getX(), last.getY(), Instant.ofEpochMilli((long)last.getZ())
+                coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long) coordinate.getZ()),
+                last.getX(), last.getY(), Instant.ofEpochMilli((long) last.getZ())
             ));
       }
     } else {
@@ -417,43 +438,44 @@ public class GeoJsonMultiLineParser {
     }
   }
 
-  private void verifyFeatureType(JsonParser jsonParser, JsonGenerator jsonGenerator, String type) throws IOException {
+  private String verifyFeatureType(JsonParser jsonParser, JsonGenerator jsonGenerator, String... type) throws IOException {
     jsonParser.nextToken();
     jsonGenerator.copyCurrentEvent(jsonParser);
     String value = jsonParser.getText();
-    if (!type.equals(value)) {
+    if (!Arrays.asList(type).contains(value)) {
       throw new IllegalArgumentException("Invalid geojson type for AM splitting: " + value);
     }
+    return value;
   }
 
-  private Coordinate resolveCoordinate(LineString lineString, Coordinate last){
-    if (lineString.getCoordinateN(0).equals(last)){
+  private Coordinate resolveCoordinate(LineString lineString, Coordinate last) {
+    if (lineString.getCoordinateN(0).equals(last)) {
       return lineString.getCoordinateN(1);
     }
     return lineString.getCoordinateN(0);
   }
 
-  private List<Coordinate> geometryParse(Coordinate coordinate, Coordinate last, GeometryCollection geometry){
+  private List<Coordinate> geometryParse(Coordinate coordinate, Coordinate last, GeometryCollection geometry) {
     Geometry l1 = geometry.getGeometryN(0);
     Geometry l2 = geometry.getGeometryN(1);
 
     if (l1 instanceof LineString && l2 instanceof LineString) {
       return geometryParse(coordinate, last, (LineString) l1, (LineString) l2, geometry);
-    } else if (l1 instanceof LineString && l2 instanceof Point){
+    } else if (l1 instanceof LineString && l2 instanceof Point) {
       return Collections.singletonList(resolveCoordinate((LineString) l1, last));
-    } else if (l2 instanceof LineString && l1 instanceof Point){
+    } else if (l2 instanceof LineString && l1 instanceof Point) {
       return Collections.singletonList(resolveCoordinate((LineString) l2, last));
     } else {
       throw new IllegalStateException(
           String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
               geometry.toString(),
-              coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long)coordinate.getZ()),
-              last.getX(), last.getY(), Instant.ofEpochMilli((long)last.getZ())
+              coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long) coordinate.getZ()),
+              last.getX(), last.getY(), Instant.ofEpochMilli((long) last.getZ())
           ));
     }
   }
 
-  private List<Coordinate> geometryParse(Coordinate coordinate, Coordinate last, LineString l1, LineString l2, Geometry geometry){
+  private List<Coordinate> geometryParse(Coordinate coordinate, Coordinate last, LineString l1, LineString l2, Geometry geometry) {
     List<Coordinate> split = new ArrayList<>(4);
     if (l1.getCoordinateN(0).equals(last) || l2.getCoordinateN(1).equals(coordinate)) {
       split.add(l1.getCoordinateN(0));

@@ -22,6 +22,21 @@ public class GeoJsonMultiLineWriter {
     format = new DecimalFormat(sb.toString(), DecimalFormatSymbols.getInstance(Locale.ENGLISH));
   }
 
+  public void startPoint() {
+    try {
+      jsonGenerator.writeStartObject();
+      jsonGenerator.writeFieldName("type");
+      jsonGenerator.writeString("Feature");
+      jsonGenerator.writeFieldName("geometry");
+      jsonGenerator.writeStartObject();
+      jsonGenerator.writeFieldName("type");
+      jsonGenerator.writeString("Point");
+      jsonGenerator.writeFieldName("coordinates");
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to write GeoJson", e);
+    }
+  }
+
   public void start() {
     try {
       jsonGenerator.writeStartObject();
@@ -39,8 +54,14 @@ public class GeoJsonMultiLineWriter {
   }
 
   public void finish(GeometryProperties properties) {
+    finish(properties, true);
+  }
+
+  public void finish(GeometryProperties properties, boolean writeEndArray) {
     try {
-      jsonGenerator.writeEndArray();
+      if(writeEndArray) {
+        jsonGenerator.writeEndArray();
+      }
       jsonGenerator.writeEndObject();
       jsonGenerator.writeFieldName("properties");
       jsonGenerator.writeObject(properties);
