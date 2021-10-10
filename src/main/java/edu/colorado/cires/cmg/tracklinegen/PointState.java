@@ -7,7 +7,7 @@ public class PointState {
   private final Point point;
   private boolean target;
   private boolean confirmed;
-  private boolean startSegment;
+  private int index;
 
   public PointState(Point point, boolean target) {
     this.point = point;
@@ -15,12 +15,12 @@ public class PointState {
     this.confirmed = target;
   }
 
-  public boolean isStartSegment() {
-    return startSegment;
+  public int getIndex() {
+    return index;
   }
 
-  public void setStartSegment(boolean startSegment) {
-    this.startSegment = startSegment;
+  public void setIndex(int index) {
+    this.index = index;
   }
 
   public boolean isConfirmed() {

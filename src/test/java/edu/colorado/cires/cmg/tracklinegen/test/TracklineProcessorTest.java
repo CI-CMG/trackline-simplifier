@@ -39,7 +39,7 @@ public class TracklineProcessorTest {
     String gsf = actualDir + "/geoSimplfied.json";
 
     GeoSimplifierProcessor tracklineProcessor = new GeoSimplifierProcessor(geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize,
-        dataFile, objectMapper, Paths.get(gsf), maxCount, simplificationTolerance, geometryFactory);
+        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory);
 
     tracklineProcessor.process();
 
@@ -68,7 +68,7 @@ public class TracklineProcessorTest {
     String gsf = actualDir + "/geoSimplfied.json";
 
     GeoSimplifierProcessor tracklineProcessor = new GeoSimplifierProcessor(geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize,
-        dataFile, objectMapper, Paths.get(gsf), maxCount, simplificationTolerance, geometryFactory);
+        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory);
 
     SimplifiedPointCountExceededException ex = assertThrows(SimplifiedPointCountExceededException.class, () -> tracklineProcessor.process());
 

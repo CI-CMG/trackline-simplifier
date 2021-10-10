@@ -22,11 +22,12 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private long unsimplifiedPointCount = 0;
   private long simplifiedPointCount = 0;
   private long targetPointCount = 0;
-  private final double tolerance;
   private final GeometryFactory geometryFactory;
   private boolean started = false;
 
   private List<PointState> pointBuffer;
+
+  private static final double MIN_DISTANCE = 0.000001;
 
 
   public BaseRowListener(
@@ -36,7 +37,6 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       int batchSize,
       Predicate<T> filterRow,
       long maxAllowedSimplifiedPoints,
-      double tolerance,
       GeometryFactory geometryFactory) {
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
@@ -44,7 +44,6 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     this.filterRow = filterRow;
     this.batchSize = batchSize;
     this.maxAllowedSimplifiedPoints = maxAllowedSimplifiedPoints;
-    this.tolerance = tolerance;
     this.geometryFactory = geometryFactory;
   }
 
@@ -59,7 +58,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       return true;
     }
     PointState lastPoint = pointBuffer.get(pointBuffer.size() - 1);
-    return thisPoint.getPoint().distance(lastPoint.getPoint()) > tolerance;
+    double distance = thisPoint.getPoint().distance(lastPoint.getPoint());
+    return distance > MIN_DISTANCE;
   }
 
   private List<List<PointState>> splitBufferSegments() {
@@ -75,9 +75,11 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         PointState lastPoint = lastSegment.get(lastSegment.size() - 1);
         if (shouldSplit(lastPoint, thisPoint)) {
           List<PointState> segment = new ArrayList<>();
+          thisPoint.setIndex(0);
           segment.add(thisPoint);
           segments.add(segment);
         } else {
+          thisPoint.setIndex(lastPoint.getIndex() + 1);
           lastSegment.add(thisPoint);
         }
       }
@@ -97,8 +99,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       if (segment.size() > 1) {
         LineString simplified = simplify(segment.stream().map(PointState::getPoint).map(Point::getCoordinate).collect(Collectors.toList()));
         Coordinate[] coordinates = simplified.getCoordinateSequence().toCoordinateArray();
-        if (coordinates.length > 2 || (coordinates.length == 2 && distance(coordinates[0], coordinates[1]) > tolerance)) {
-          if (segment.get(0).isStartSegment()) {
+        if (coordinates.length > 2 || (coordinates.length == 2 && distance(coordinates[0], coordinates[1]) > MIN_DISTANCE)) {
+          if (segment.get(0).getIndex() == 0) {
             if (!started) {
               lineWriter.start();
               started = true;
@@ -118,9 +120,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
             lineWriter.endLine();
           } else {
             nextPointState = new PointState(geometryFactory.createPoint(coordinates[coordinates.length - 1]), true);
-            if (coordinates.length == 0) {
-              nextPointState.setStartSegment(true);
-            }
+            nextPointState.setIndex(coordinates.length - 1);
           }
         } else {
           throw new IllegalStateException("Simplified LineString resulted in a point");
@@ -150,16 +150,19 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private static List<List<PointState>> removeNonTarget(List<List<PointState>> segments) {
     for (List<PointState> segment : segments) {
       ListIterator<PointState> it = segment.listIterator();
+      int removedCount = 0;
+      boolean foundConfirmed = false;
       while (it.hasNext()) {
         PointState pointState = it.next();
-        if (!pointState.isConfirmed()) {
+        if (!foundConfirmed && !pointState.isConfirmed()) {
+          removedCount++;
           it.remove();
         } else {
-          break;
+          foundConfirmed = true;
+          pointState.setIndex(pointState.getIndex() - removedCount);
         }
       }
       if (!segment.isEmpty()) {
-        segment.get(0).setStartSegment(true);
         it = segment.listIterator(segment.size());
         while (it.hasPrevious()) {
           PointState pointState = it.previous();
@@ -174,7 +177,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     return segments;
   }
 
-  private static List<List<PointState>> removeSingletons(List<List<PointState>> segments, boolean finish) {
+  private static List<List<PointState>> removeSingletons(List<List<PointState>> segments, boolean finish, boolean started) {
 
     if (finish && segments.size() == 1 && segments.get(0).size() == 1) {
       return segments;
@@ -184,17 +187,26 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     for (int i = 0; i < segments.size(); i++) {
       List<PointState> segment = segments.get(i);
       if (segment.size() >= 2
-          || (segment.size() == 1 && i == 0 && !segment.get(0).isStartSegment())
+          || (segment.size() == 1 && i == 0 && segment.get(0).getIndex() > 0)
           || (!finish && segment.size() == 1 && i == segments.size() - 1)
       ) {
         filtered.add(segment);
       }
     }
+
+    if (!started && finish && filtered.isEmpty() && !segments.isEmpty()) {
+      List<PointState> segment = segments.stream()
+          .filter(list -> !list.isEmpty())
+          .findFirst()
+          .orElseThrow(() -> new IllegalStateException("Empty LineString generated"));
+      filtered.add(segment);
+    }
+
     return filtered;
   }
 
   private void writeSimplified() {
-    final List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()), false);
+    final List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()), false, started);
     List<PointState> lastSegment = segments.get(segments.size() - 1);
     lastSegment.get(lastSegment.size() - 1).setConfirmed(true);
     int count = segments.stream().map(List::size).reduce(0, Integer::sum);
@@ -219,7 +231,6 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       targetPointCount++;
     }
     if (pointBuffer.isEmpty()) {
-      pointState.setStartSegment(true);
       pointBuffer.add(pointState);
     } else if (isDifferentFromLast(pointState)) {
       pointBuffer.add(pointState);
@@ -238,7 +249,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   @Override
   public void finish() {
 
-    final List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()), true);
+    final List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()), true, started);
     int count = segments.stream().map(List::size).reduce(0, Integer::sum);
     if (started) {
       if (count != 0) {

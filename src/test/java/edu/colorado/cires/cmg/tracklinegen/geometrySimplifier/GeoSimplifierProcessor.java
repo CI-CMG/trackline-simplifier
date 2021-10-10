@@ -19,11 +19,10 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
   private ObjectMapper objectMapper;
   private Path gsf;
   private long maxCount;
-  private final double tolerance;
   private final GeometryFactory geometryFactory;
 
   public GeoSimplifierProcessor(int geoJsonPrecision, long msSplit, GeometrySimplifier geometrySimplifier, int simplifierBatchSize,
-      Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount, double tolerance, GeometryFactory geometryFactory) {
+      Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount, GeometryFactory geometryFactory) {
     this.geoJsonPrecision = geoJsonPrecision;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
@@ -32,7 +31,6 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
     this.objectMapper = objectMapper;
     this.gsf = gsf;
     this.maxCount = maxCount;
-    this.tolerance = tolerance;
     this.geometryFactory = geometryFactory;
   }
 
@@ -49,7 +47,6 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
         context.getLineWriter(),
         simplifierBatchSize,
         maxCount,
-        tolerance,
         geometryFactory
         )
     );

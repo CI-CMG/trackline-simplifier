@@ -39,8 +39,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount,
-        simplificationTolerance, geometryFactory
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
     );
     phase1.process();
 

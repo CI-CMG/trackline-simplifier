@@ -11,7 +11,6 @@ public class GsBaseRowListener extends BaseRowListener<DataRow> {
 
   public GsBaseRowListener(long msSplit, GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter, int batchSize, long maxCount,
-      double tolerance,
       GeometryFactory geometryFactory) {
     super(msSplit,
         geometrySimplifier,
@@ -19,7 +18,6 @@ public class GsBaseRowListener extends BaseRowListener<DataRow> {
         batchSize,
         dataRow -> true,
         maxCount,
-        tolerance,
         geometryFactory);
   }
 }
