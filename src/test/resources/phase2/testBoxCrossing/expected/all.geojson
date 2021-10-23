@@ -17,8 +17,8 @@
 	},
 	"bbox": [176, -5, -175, 5],
 	"properties": {
-		"distanceM": 1254260.195340192,
-		"avgSpeedMPS": 78356273.96209745,
+		"distanceM": 1254260.1953401922,
+		"avgSpeedMPS": 78356273.96209747,
 		"unsimplifiedPointCount": 23,
 		"simplifiedPointCount": 7,
 		"targetPointCount": 22

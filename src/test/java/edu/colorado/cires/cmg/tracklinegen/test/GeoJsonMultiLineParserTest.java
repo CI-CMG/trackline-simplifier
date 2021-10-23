@@ -11,7 +11,6 @@ import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.jackson.ObjectMapp
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 public class GeoJsonMultiLineParserTest {
