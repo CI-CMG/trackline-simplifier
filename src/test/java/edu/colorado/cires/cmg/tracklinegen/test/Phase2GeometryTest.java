@@ -1,14 +1,11 @@
 package edu.colorado.cires.cmg.tracklinegen.test;
 
+import static edu.colorado.cires.cmg.tracklinegen.JsonPropertiesUtils.assertJsonEquivalent;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.colorado.cires.cmg.tracklinegen.GeometrySimplifier;
-import edu.colorado.cires.cmg.tracklinegen.ValidationException;
 import edu.colorado.cires.cmg.tracklinegen.ValidationRuntimeException;
 import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.GeoJsonProcessor;
 import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.jackson.ObjectMapperCreator;
@@ -17,16 +14,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Date;
-import javax.persistence.criteria.CriteriaBuilder.In;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -56,7 +43,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected, actual);
+    assertJsonEquivalent(expected, actual, 0.00001);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
@@ -114,7 +101,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected, actual);
+    assertJsonEquivalent(expected, actual, 0.00001);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
@@ -143,7 +130,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected, actual);
+    assertJsonEquivalent(expected, actual, 0.00001);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
@@ -172,7 +159,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected, actual);
+    assertJsonEquivalent(expected, actual, 0.00001);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));

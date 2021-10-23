@@ -16,6 +16,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 
 public class TracklineProcessorTest {
+
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
@@ -31,8 +32,8 @@ public class TracklineProcessorTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
     String actualDir = "target/test-classes/phase1/actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
     Path dataFile = Paths.get("src/test/resources/phase1/test1/data.txt");
@@ -45,7 +46,7 @@ public class TracklineProcessorTest {
 
     JsonNode actual = objectMapper.readTree(new File(gsf));
     JsonNode expected = objectMapper.readTree(new File("src/test/resources/phase1/test1/expected.geojson"));
-    assertEquals(expected,actual);
+    assertEquals(expected, actual);
   }
 
   @Test
@@ -60,8 +61,8 @@ public class TracklineProcessorTest {
     ObjectMapper objectMapper = new ObjectMapper();
 
     String actualDir = "target/test-classes/phase1/actual";
-    File directory= new File(actualDir);
-    if (! directory.exists()){
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
       directory.mkdir();
     }
     Path dataFile = Paths.get("src/test/resources/phase1/test1/data.txt");
