@@ -6,7 +6,7 @@
 
   <groupId>com.github.ci-cmg</groupId>
   <artifactId>trackline-simplifier</artifactId>
-  <version>2.0.2</version>
+  <version>2.0.3-SNAPSHOT</version>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
