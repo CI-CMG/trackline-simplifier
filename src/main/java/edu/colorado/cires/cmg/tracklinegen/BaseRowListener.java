@@ -143,7 +143,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         started
     );
 
-    int count = segments.stream().map(List::size).reduce(0, Integer::sum);
+    int count = simplified.stream().map(List::size).reduce(0, Integer::sum);
     if (count < batchSize) {
       return simplified;
     }

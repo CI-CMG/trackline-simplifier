@@ -1,7 +1,7 @@
 package edu.colorado.cires.cmg.tracklinegen.test;
 
 import static edu.colorado.cires.cmg.tracklinegen.JsonPropertiesUtils.assertJsonEquivalent;
-import static junit.framework.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,12 +9,19 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineProcessor;
 import edu.colorado.cires.cmg.tracklinegen.GeometrySimplifier;
 import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.GeoSimplifierProcessor;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoField;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -50,6 +57,40 @@ public class PointTest {
 //            lat
 //            ));
 //        writer.newLine();
+//      }
+//    }
+//  }
+
+//    @Test
+//  public void ddd2() throws Exception {
+//    Path xyzFile = Paths.get("src/test/resources/data.xyz");
+//    try(
+//        BufferedReader reader = Files.newBufferedReader(xyzFile);
+//        BufferedWriter writer = Files.newBufferedWriter(Paths.get("src/test/resources/data.txt"))) {
+//      String line;
+//      int lineNum = 0;
+//      while ((line = reader.readLine()) != null) {
+//        if(lineNum > 0) {
+//          line = line.trim();
+//          if(!line.isEmpty()) {
+//            String[] parts = line.split(",");
+//            double lon = Double.parseDouble(parts[0]);
+//            double lat = Double.parseDouble(parts[1]);
+//            LocalDateTime time = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(parts[3])), ZoneId.of("UTC"));
+//            writer.write(String.format("%04d %02d %02d %02d %02d %09.6f,%.6f,%.6f",
+//                time.get(ChronoField.YEAR),
+//                time.get(ChronoField.MONTH_OF_YEAR),
+//                time.get(ChronoField.DAY_OF_MONTH),
+//                time.get(ChronoField.HOUR_OF_DAY),
+//                time.get(ChronoField.MINUTE_OF_HOUR),
+//                (double)time.get(ChronoField.SECOND_OF_MINUTE) + (double) time.get(ChronoField.MILLI_OF_SECOND) / 1000d,
+//                lon,
+//                lat
+//            ));
+//          }
+//          writer.newLine();
+//        }
+//        lineNum++;
 //      }
 //    }
 //  }
@@ -90,7 +131,6 @@ public class PointTest {
 
     geoJsonBytes = geoJsonOut.toByteArray();
     wktBytes = wktOut.toByteArray();
-
 
     assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/single-point-test.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
 
@@ -135,7 +175,6 @@ public class PointTest {
 
     geoJsonBytes = geoJsonOut.toByteArray();
     wktBytes = wktOut.toByteArray();
-
 
     assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/single-point-test2.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
 
@@ -321,7 +360,8 @@ public class PointTest {
 
       geoJsonBytes = geoJsonOut.toByteArray();
 
-      assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/multi-buffer-bad-pt-first.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+      assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/multi-buffer-bad-pt-first.json")), objectMapper.readTree(geoJsonBytes),
+          0.00001);
     }
   }
 
@@ -360,7 +400,8 @@ public class PointTest {
 
       geoJsonBytes = geoJsonOut.toByteArray();
 
-      assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/multi-buffer-bad-pt-first.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+      assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/multi-buffer-bad-pt-first.json")), objectMapper.readTree(geoJsonBytes),
+          0.00001);
     }
   }
 
@@ -399,8 +440,53 @@ public class PointTest {
 
       geoJsonBytes = geoJsonOut.toByteArray();
 
-      assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/multi-buffer-bad-pt-first.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+      assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/multi-buffer-bad-pt-first.json")), objectMapper.readTree(geoJsonBytes),
+          0.00001);
     }
+  }
+
+
+  @Test
+  public void testLargeFileMultiPrecision() throws Exception {
+
+    final int msSplit = 0;
+    final long maxCount = 10000;
+    final long simplifierBatchSize = maxCount;
+
+    final double simplificationTolerance = 0.01;
+
+    final int geoJsonPrecision = 5;
+
+    GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
+    ObjectMapper objectMapper = new ObjectMapper();
+    Path dataFile = Paths.get("src/test/resources/data.txt");
+
+    Path gsf = Paths.get("target/data.p1");
+
+    double maxAllowedSpeedKnts = 0D;
+
+    byte[] geoJsonBytes = null;
+    byte[] wktBytes = null;
+
+    GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
+        geoJsonPrecision, msSplit, geometrySimplifier, (int) simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
+    );
+    phase1.process();
+
+    final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
+    final ByteArrayOutputStream wktOut = new ByteArrayOutputStream();
+
+    try (InputStream in = Files.newInputStream(gsf)) {
+      GeoJsonMultiLineProcessor phase2 = new GeoJsonMultiLineProcessor(
+          objectMapper, geoJsonPrecision, maxAllowedSpeedKnts
+      );
+      phase2.process(in, geoJsonOut, wktOut);
+    }
+
+    geoJsonBytes = geoJsonOut.toByteArray();
+
+    assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/data.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+
   }
 
 }
