@@ -47,7 +47,8 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
         context.getLineWriter(),
         simplifierBatchSize,
         maxCount,
-        geometryFactory
+        geometryFactory,
+        geoJsonPrecision
         )
     );
   }
