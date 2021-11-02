@@ -95,6 +95,57 @@ public class PointTest {
 //    }
 //  }
 
+  private String convertToIso(String orig) {
+    //20191011T055216Z -> 2007-12-03T10:15:30.00Z
+    StringBuilder sb = new StringBuilder();
+    sb.append(orig.substring(0, 4))
+        .append("-")
+        .append(orig.substring(4, 6))
+        .append("-")
+        .append(orig.substring(6, 11))
+        .append(":")
+        .append(orig.substring(11, 13))
+        .append(":")
+        .append(orig.substring(13, 15))
+        .append(".000Z");
+    return sb.toString();
+  }
+
+//      @Test
+//  public void ddd3() throws Exception {
+//    Path xyzFile = Paths.get("src/test/resources/20191011_53346a5c5b41418c433dd299b8bb1f59_pointData.xyz");
+//    try(
+//        BufferedReader reader = Files.newBufferedReader(xyzFile);
+//        BufferedWriter writer = Files.newBufferedWriter(Paths.get("src/test/resources/single-point2.txt"))) {
+//      String line;
+//      int lineNum = 0;
+//      while ((line = reader.readLine()) != null) {
+//        if(lineNum > 0) {
+//          line = line.trim();
+//          if(!line.isEmpty()) {
+//            String[] parts = line.split(",");
+//            double lat = Double.parseDouble(parts[0]);
+//            double lon = Double.parseDouble(parts[1]);
+//
+//            LocalDateTime time = LocalDateTime.ofInstant(Instant.parse(convertToIso(parts[3])), ZoneId.of("UTC"));
+//            writer.write(String.format("%04d %02d %02d %02d %02d %09.6f,%.6f,%.6f",
+//                time.get(ChronoField.YEAR),
+//                time.get(ChronoField.MONTH_OF_YEAR),
+//                time.get(ChronoField.DAY_OF_MONTH),
+//                time.get(ChronoField.HOUR_OF_DAY),
+//                time.get(ChronoField.MINUTE_OF_HOUR),
+//                (double)time.get(ChronoField.SECOND_OF_MINUTE) + (double) time.get(ChronoField.MILLI_OF_SECOND) / 1000d,
+//                lon,
+//                lat
+//            ));
+//          }
+//          writer.newLine();
+//        }
+//        lineNum++;
+//      }
+//    }
+//  }
+
   @Test
   public void testSimplifiedPoint() throws Exception {
 
@@ -488,5 +539,49 @@ public class PointTest {
     assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/data.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
 
   }
+
+  @Test
+  public void testSinglePoint2() throws Exception {
+
+    final int geoJsonPrecision = 5;
+    final double simplificationTolerance = 0.0001;
+    final int simplifierBatchSize = 3000;
+    final int msSplit = 3600000;
+    final long maxCount = 10000;
+    GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
+    ObjectMapper objectMapper = new ObjectMapper();
+    Path dataFile = Paths.get("src/test/resources/single-point2.txt");
+
+    Path gsf = Paths.get("target/single-point2.p1");
+
+    double maxAllowedSpeedKnts = 0D;
+
+    byte[] geoJsonBytes = null;
+    byte[] wktBytes = null;
+
+    GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
+    );
+    phase1.process();
+
+    final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
+    final ByteArrayOutputStream wktOut = new ByteArrayOutputStream();
+
+    try (InputStream in = Files.newInputStream(gsf)) {
+      GeoJsonMultiLineProcessor phase2 = new GeoJsonMultiLineProcessor(
+          objectMapper, geoJsonPrecision, maxAllowedSpeedKnts
+      );
+      phase2.process(in, geoJsonOut, wktOut);
+    }
+
+    geoJsonBytes = geoJsonOut.toByteArray();
+    wktBytes = wktOut.toByteArray();
+
+    assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/single-point2.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+
+    assertEquals(new String(Files.readAllBytes(Paths.get("src/test/resources/single-point2.wkt"))), new String(wktBytes));
+
+  }
+
 
 }

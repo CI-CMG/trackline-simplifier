@@ -27,7 +27,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   private List<PointState> pointBuffer;
 
-  private static final double MIN_DISTANCE = 0.000001;
+  private final double minDistance;
 
 
   public BaseRowListener(
@@ -37,7 +37,9 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       int batchSize,
       Predicate<T> filterRow,
       long maxAllowedSimplifiedPoints,
-      GeometryFactory geometryFactory) {
+      GeometryFactory geometryFactory,
+      int geoJsonPrecision
+  ) {
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
     this.lineWriter = lineWriter;
@@ -45,6 +47,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     this.batchSize = batchSize;
     this.maxAllowedSimplifiedPoints = maxAllowedSimplifiedPoints;
     this.geometryFactory = geometryFactory;
+    this.minDistance = 1d / Math.pow(10d, geoJsonPrecision);
   }
 
   @Override
@@ -86,7 +89,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       Coordinate[] coordinates = simplified.getCoordinateSequence().toCoordinateArray();
       simplifiedSegment = new ArrayList<>();
       for (int i = 0; i < coordinates.length; i++) {
-        if (i == 0 || coordinates.length > 2 || distance(coordinates[0], coordinates[1]) > MIN_DISTANCE) {
+        if (i == 0 || coordinates.length > 2 || distance(coordinates[0], coordinates[1]) > minDistance) {
           Coordinate coordinate = coordinates[i];
           PointState pointState = new PointState(geometryFactory.createPoint(coordinate), true);
           pointState.setIndex(i + startIndex);
