@@ -35,10 +35,10 @@ public class PointTest {
 
 //  @Test
 //  public void ddd() throws Exception {
-//    Path jsonFile = Paths.get("src/test/resources/20200508_d06ee6d9c1985b600ec5e4d6684ea2b7_geojson.json");
+//    Path jsonFile = Paths.get("src/test/resources/20200430_bd7ca68151459c38e9dff2fd65ec5efe_geojson.json");
 //    JsonNode json = OBJECT_MAPPER.readTree(jsonFile.toFile());
 //    ArrayNode features = (ArrayNode) json.get("features");
-//    try(BufferedWriter writer = Files.newBufferedWriter(Paths.get("src/test/resources/single-point-test2.txt"))) {
+//    try(BufferedWriter writer = Files.newBufferedWriter(Paths.get("src/test/resources/single-point4.txt"))) {
 //      for (JsonNode feature : features) {
 //        JsonNode geometry = feature.get("geometry");
 //        JsonNode properties = feature.get("properties");
@@ -113,10 +113,10 @@ public class PointTest {
 
 //      @Test
 //  public void ddd3() throws Exception {
-//    Path xyzFile = Paths.get("src/test/resources/20191011_53346a5c5b41418c433dd299b8bb1f59_pointData.xyz");
+//    Path xyzFile = Paths.get("src/test/resources/20191214_fbf5718ac3b53952fd99064b7203f08f_pointData.xyz");
 //    try(
 //        BufferedReader reader = Files.newBufferedReader(xyzFile);
-//        BufferedWriter writer = Files.newBufferedWriter(Paths.get("src/test/resources/single-point2.txt"))) {
+//        BufferedWriter writer = Files.newBufferedWriter(Paths.get("src/test/resources/single-point3.txt"))) {
 //      String line;
 //      int lineNum = 0;
 //      while ((line = reader.readLine()) != null) {
@@ -376,6 +376,7 @@ public class PointTest {
   }
 
 
+
   @Test
   public void testMultiBufferBadFirst() throws Exception {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
@@ -536,6 +537,7 @@ public class PointTest {
 
     geoJsonBytes = geoJsonOut.toByteArray();
 
+    System.out.println(new String(geoJsonBytes));
     assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/data.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
 
   }
@@ -583,5 +585,91 @@ public class PointTest {
 
   }
 
+
+  @Test
+  public void testSinglePoint3() throws Exception {
+
+    final int geoJsonPrecision = 5;
+    final double simplificationTolerance = 0.0001;
+    final int simplifierBatchSize = 3000;
+    final int msSplit = 3600000;
+    final long maxCount = 10000;
+    GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
+    ObjectMapper objectMapper = new ObjectMapper();
+    Path dataFile = Paths.get("src/test/resources/single-point3.txt");
+
+    Path gsf = Paths.get("target/single-point3.p1");
+
+    double maxAllowedSpeedKnts = 0D;
+
+    byte[] geoJsonBytes = null;
+    byte[] wktBytes = null;
+
+    GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
+    );
+    phase1.process();
+
+    final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
+    final ByteArrayOutputStream wktOut = new ByteArrayOutputStream();
+
+    try (InputStream in = Files.newInputStream(gsf)) {
+      GeoJsonMultiLineProcessor phase2 = new GeoJsonMultiLineProcessor(
+          objectMapper, geoJsonPrecision, maxAllowedSpeedKnts
+      );
+      phase2.process(in, geoJsonOut, wktOut);
+    }
+
+    geoJsonBytes = geoJsonOut.toByteArray();
+    wktBytes = wktOut.toByteArray();
+
+    assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/single-point3.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+
+    assertEquals(new String(Files.readAllBytes(Paths.get("src/test/resources/single-point3.wkt"))), new String(wktBytes));
+
+  }
+
+  @Test
+  public void testSinglePoint4() throws Exception {
+
+    final int geoJsonPrecision = 5;
+    final double simplificationTolerance = 0.0001;
+    final int simplifierBatchSize = 3000;
+    final int msSplit = 3600000;
+    final long maxCount = 10000;
+    GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
+    ObjectMapper objectMapper = new ObjectMapper();
+    Path dataFile = Paths.get("src/test/resources/single-point4.txt");
+
+    Path gsf = Paths.get("target/single-point4.p1");
+
+    double maxAllowedSpeedKnts = 0D;
+
+    byte[] geoJsonBytes = null;
+    byte[] wktBytes = null;
+
+    GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
+    );
+    phase1.process();
+
+    final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
+    final ByteArrayOutputStream wktOut = new ByteArrayOutputStream();
+
+    try (InputStream in = Files.newInputStream(gsf)) {
+      GeoJsonMultiLineProcessor phase2 = new GeoJsonMultiLineProcessor(
+          objectMapper, geoJsonPrecision, maxAllowedSpeedKnts
+      );
+      phase2.process(in, geoJsonOut, wktOut);
+    }
+
+    geoJsonBytes = geoJsonOut.toByteArray();
+    wktBytes = wktOut.toByteArray();
+
+    assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/single-point4.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+
+    assertEquals(new String(Files.readAllBytes(Paths.get("src/test/resources/single-point4.wkt"))), new String(wktBytes));
+
+  }
 
 }

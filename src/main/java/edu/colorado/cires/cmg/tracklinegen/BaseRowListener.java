@@ -1,8 +1,13 @@
 package edu.colorado.cires.cmg.tracklinegen;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.locationtech.jts.geom.Coordinate;
@@ -28,6 +33,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private List<PointState> pointBuffer;
 
   private final double minDistance;
+  private final DecimalFormat format;
 
 
   public BaseRowListener(
@@ -48,6 +54,11 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     this.maxAllowedSimplifiedPoints = maxAllowedSimplifiedPoints;
     this.geometryFactory = geometryFactory;
     this.minDistance = 1d / Math.pow(10d, geoJsonPrecision);
+    StringBuilder sb = new StringBuilder("0.");
+    for (int i = 1; i <= geoJsonPrecision; i++) {
+      sb.append("#");
+    }
+    format = new DecimalFormat(sb.toString(), DecimalFormatSymbols.getInstance(Locale.ENGLISH));
   }
 
   @Override
@@ -311,8 +322,12 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     simplifiedPointCount++;
   }
 
+  private double round(double value) {
+    return Double.parseDouble(format.format(value));
+  }
+
   private Coordinate toCoordinate(T row) {
-    return new Coordinate(row.getLon(), row.getLat(), row.getTimestamp().toEpochMilli());
+    return new Coordinate(round(row.getLon()), round(row.getLat()), row.getTimestamp().toEpochMilli());
   }
 
   private LineString simplify(List<Coordinate> coordinates) {
