@@ -4,9 +4,47 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.ci-cmg</groupId>
+  <groupId>io.github.ci-cmg</groupId>
   <artifactId>trackline-simplifier</artifactId>
-  <version>2.0.0-SNAPSHOT</version>
+  <version>2.1.0-SNAPSHOT</version>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>
+    The trackline-simplifier creates a simplified geometry from a source of longitude, latitude, and timestamped coordinates.
+  </description>
+  <url>https://github.com/CI-CMG/trackline-simplifier</url>
+
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>http://www.opensource.org/licenses/mit-license.php</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>CIRES Coastal and Marine Geophysics / Marine Geology and Geophysics Developers</name>
+      <organization>CIRES</organization>
+      <organizationUrl>https://github.com/CI-CMG</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:CI-CMG/trackline-simplifier.git</connection>
+    <developerConnection>scm:git:git@github.com:CI-CMG/trackline-simplifier.git</developerConnection>
+    <url>https://github.com/CI-CMG/trackline-simplifier</url>
+  </scm>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
@@ -14,7 +52,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <jts.version>1.16.1</jts.version>
-    <!--    <geotools.version>22.3</geotools.version>-->
     <geotools.version>23.5</geotools.version>
     <jackson.version>2.11.2</jackson.version>
     <slf4j.version>1.7.30</slf4j.version>
@@ -73,18 +110,6 @@
       <version>${jackson.version}</version>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.8.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>RELEASE</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>5.8.1</version>
@@ -110,6 +135,11 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>0.8.5</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.2.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -156,6 +186,32 @@
           </execution>
         </executions>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.2.1</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -176,6 +232,33 @@
               <execution>
                 <goals>
                   <goal>check</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>release-sign-artifacts</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
                 </goals>
               </execution>
             </executions>
