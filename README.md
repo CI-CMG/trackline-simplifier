@@ -45,7 +45,7 @@ and try again
 
 ### Release
 ```bash
-mvn release:perform site
+mvn release:perform
 ```
 OR
 ```bash

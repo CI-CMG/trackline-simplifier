@@ -39,10 +39,6 @@
       <id>ossrh</id>
       <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
-<!--    <repository>-->
-<!--      <id>ossrh</id>-->
-<!--      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
-<!--    </repository>-->
   </distributionManagement>
 
 
@@ -213,7 +209,7 @@
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <useReleaseProfile>false</useReleaseProfile>
           <releaseProfiles>release</releaseProfiles>
-          <goals>deploy</goals>
+          <goals>deploy site</goals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
         </configuration>
       </plugin>
@@ -289,12 +285,6 @@
 
     <profile>
       <id>release</id>
-<!--      <activation>-->
-<!--        <property>-->
-<!--          <name>performRelease</name>-->
-<!--          <value>true</value>-->
-<!--        </property>-->
-<!--      </activation>-->
       <build>
         <plugins>
           <plugin>
@@ -311,7 +301,6 @@
             </executions>
             <configuration>
               <injectAllReactorProjects>true</injectAllReactorProjects>
-<!--              <generateGitPropertiesFile>true</generateGitPropertiesFile>-->
               <failOnNoGitDirectory>false</failOnNoGitDirectory>
               <offline>true</offline>
               <replacementProperties>
