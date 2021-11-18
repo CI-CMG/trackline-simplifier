@@ -46,7 +46,9 @@
     </repository>
   </distributionManagement>
 
+
   <properties>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -55,6 +57,8 @@
     <geotools.version>23.5</geotools.version>
     <jackson.version>2.11.2</jackson.version>
     <slf4j.version>1.7.30</slf4j.version>
+    <javadoc.version>3.3.1</javadoc.version>
+    <jacoco.version>0.8.5</jacoco.version>
   </properties>
 
   <repositories>
@@ -128,23 +132,94 @@
     </dependency>
   </dependencies>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>${javadoc.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco.version}</version>
+      </plugin>
+
+    </plugins>
+  </reporting>
+
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <version>3.0.0</version>
+        </plugin>
+        <plugin>
+          <groupId>pl.project13.maven</groupId>
+          <artifactId>git-commit-id-plugin</artifactId>
+          <version>4.9.10</version>
+        </plugin>
+        <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.5</version>
+          <version>${jacoco.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
           <version>3.2.1</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.9.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-project-info-reports-plugin</artifactId>
+          <version>3.1.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${javadoc.version}</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
     <plugins>
+
+      <plugin>
+        <groupId>pl.project13.maven</groupId>
+        <artifactId>git-commit-id-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+<!--            <phase>initialize</phase>-->
+            <phase>pre-site</phase>
+          </execution>
+        </executions>
+        <configuration>
+          <injectAllReactorProjects>true</injectAllReactorProjects>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+          <offline>true</offline>
+          <replacementProperties>
+            <replacementProperty>
+              <property>git.remote.origin.url</property>
+              <propertyOutputSuffix>suffix</propertyOutputSuffix>
+              git@github.com\:CI-CMG/trackline-simplifier.git
+              <token>^.+/(.+).git$</token>
+              <value>$1</value>
+              <regex>true</regex>
+            </replacementProperty>
+          </replacementProperties>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -189,7 +264,6 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.3.1</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -209,6 +283,97 @@
             <goals>
               <goal>jar-no-fork</goal>
             </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+<!--        <configuration>-->
+<!--          <outputDirectory>${project.build.directory}/site/${git.remote.origin.url.suffix}/${project.version}</outputDirectory>-->
+<!--        </configuration>-->
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>index.html</id>
+            <phase>site</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/site-resources</outputDirectory>
+              <useDefaultDelimiters>false</useDefaultDelimiters>
+              <delimiters>
+                <delimiter>@</delimiter>
+              </delimiters>
+              <resources>
+                <resource>
+                  <directory>site-resources</directory>
+                  <filtering>true</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>publish-site</id>
+            <phase>site</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <delete dir="${project.build.directory}/project-documentation" quiet="true"/>
+                <exec dir="${project.build.directory}" executable="git">
+                  <arg value="clone"/>
+                  <arg value="--depth=1"/>
+                  <arg value="git@github.com:CI-CMG/project-documentation.git"/>
+                </exec>
+                <exec dir="${project.build.directory}/project-documentation" executable="git">
+                  <arg value="remote"/>
+                  <arg value="add"/>
+                  <arg value="javadoc"/>
+                  <arg value="git@github.com:CI-CMG/project-documentation.git"/>
+                </exec>
+                <exec dir="${project.build.directory}/project-documentation" executable="git" failonerror="false">
+                  <arg value="rm"/>
+                  <arg value="-r"/>
+                  <arg value="${git.remote.origin.url.suffix}/${project.version}"/>
+                </exec>
+                <mkdir dir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}"/>
+                <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}">
+                  <fileset file="${project.build.directory}/site-resources/index.html"/>
+                </copy>
+                <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}/${project.version}">
+                  <fileset dir="${project.build.directory}/site"/>
+                </copy>
+                <exec dir="${project.build.directory}/project-documentation" executable="git">
+                  <arg value="add"/>
+                  <arg value="${git.remote.origin.url.suffix}/index.html"/>
+                </exec>
+                <exec dir="${project.build.directory}/project-documentation" executable="git">
+                  <arg value="add"/>
+                  <arg value="${git.remote.origin.url.suffix}/${project.version}"/>
+                </exec>
+                <exec dir="${project.build.directory}/project-documentation" executable="git">
+                  <arg value="commit"/>
+                  <arg value="-m"/>
+                  <arg value="Update Documentation: ${git.remote.origin.url.suffix}/${project.version}"/>
+                </exec>
+                <exec dir="${project.build.directory}/project-documentation" executable="git">
+                  <arg value="push"/>
+                  <arg value="javadoc"/>
+                  <arg value="trunk"/>
+                </exec>
+              </target>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -263,6 +428,7 @@
               </execution>
             </executions>
           </plugin>
+
         </plugins>
       </build>
     </profile>
