@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 import org.locationtech.jts.geom.GeometryFactory;
 
 public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierContext, DataRow, GsBaseRowListener> {
@@ -20,9 +21,11 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
   private Path gsf;
   private long maxCount;
   private final GeometryFactory geometryFactory;
+  private final Predicate<DataRow> rowFilter;
 
   public GeoSimplifierProcessor(int geoJsonPrecision, long msSplit, GeometrySimplifier geometrySimplifier, int simplifierBatchSize,
-      Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount, GeometryFactory geometryFactory) {
+      Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount, GeometryFactory geometryFactory,
+      Predicate<DataRow> rowFilter) {
     this.geoJsonPrecision = geoJsonPrecision;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
@@ -32,6 +35,7 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
     this.gsf = gsf;
     this.maxCount = maxCount;
     this.geometryFactory = geometryFactory;
+    this.rowFilter = rowFilter;
   }
 
   @Override
@@ -48,7 +52,8 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
         simplifierBatchSize,
         maxCount,
         geometryFactory,
-        geoJsonPrecision
+        geoJsonPrecision,
+        rowFilter
         )
     );
   }

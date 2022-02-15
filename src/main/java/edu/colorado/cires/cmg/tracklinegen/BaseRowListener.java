@@ -269,12 +269,15 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       if(count > 1) {
         writeFinalSegments(segments);
         lineString = true;
-      } else {
+      } else if (count == 1){
         lineWriter.startPoint();
         started = true;
         incrementSimplifiedPointCount();
         PointState pointState = segments.get(0).get(0);
         writeCoordinate(pointState.getPoint().getCoordinate());
+      } else {
+        lineWriter.start();
+        lineString = true;
       }
     }
 
