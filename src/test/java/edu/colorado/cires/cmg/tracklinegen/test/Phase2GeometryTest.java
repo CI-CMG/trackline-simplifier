@@ -1,7 +1,7 @@
 package edu.colorado.cires.cmg.tracklinegen.test;
 
 import static edu.colorado.cires.cmg.tracklinegen.JsonPropertiesUtils.assertJsonEquivalent;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -187,7 +187,7 @@ public class Phase2GeometryTest {
       geoJsonProcessor.process();
     });
 
-    Assertions.assertEquals(
+    assertEquals(
         "Speed from (-157.892060, 21.271820, 1970-04-22T20:39:00Z) to (-157.916370, 21.142970, 1970-04-22T21:20:00Z) was 11.447975 knots, which exceeded allowed maximum of 11.447974 knots",
         exception.getMessage());
 

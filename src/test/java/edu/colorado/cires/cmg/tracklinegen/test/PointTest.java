@@ -9,19 +9,12 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineProcessor;
 import edu.colorado.cires.cmg.tracklinegen.GeometrySimplifier;
 import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.GeoSimplifierProcessor;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoField;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
@@ -166,8 +159,8 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-    );
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> true);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -210,8 +203,8 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-    );
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> true);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -254,8 +247,8 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-    );
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> true);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -296,8 +289,8 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-      );
+          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          row -> true);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -338,8 +331,8 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-      );
+          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          row -> true);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -396,8 +389,8 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-      );
+          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          row -> true);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -436,8 +429,8 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-      );
+          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          row -> true);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -476,8 +469,8 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-      );
+          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          row -> true);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -521,8 +514,8 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, (int) simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-    );
+        geoJsonPrecision, msSplit, geometrySimplifier, (int) simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> true);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -562,8 +555,8 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-    );
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> true);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -606,8 +599,8 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-    );
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> true);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -649,8 +642,8 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory
-    );
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> true);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -669,6 +662,49 @@ public class PointTest {
     assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/single-point4.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
 
     assertEquals(new String(Files.readAllBytes(Paths.get("src/test/resources/single-point4.wkt"))), new String(wktBytes));
+
+  }
+
+  @Test
+  public void testFilteredPoints() throws Exception {
+
+    final int geoJsonPrecision = 5;
+    final double simplificationTolerance = 0.0001;
+    final int simplifierBatchSize = 3000;
+    final int msSplit = 3600000;
+    final long maxCount = 10000;
+    GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
+    ObjectMapper objectMapper = new ObjectMapper();
+    Path dataFile = Paths.get("src/test/resources/single-point4.txt");
+
+    Path gsf = Paths.get("target/single-point4.p1");
+
+    double maxAllowedSpeedKnts = 0D;
+
+    byte[] geoJsonBytes = null;
+    byte[] wktBytes = null;
+
+    GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
+        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        row -> false);
+    phase1.process();
+
+    final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
+    final ByteArrayOutputStream wktOut = new ByteArrayOutputStream();
+
+    try (InputStream in = Files.newInputStream(gsf)) {
+      GeoJsonMultiLineProcessor phase2 = new GeoJsonMultiLineProcessor(
+          objectMapper, geoJsonPrecision, maxAllowedSpeedKnts
+      );
+      phase2.process(in, geoJsonOut, wktOut);
+    }
+
+    geoJsonBytes = geoJsonOut.toByteArray();
+    wktBytes = wktOut.toByteArray();
+
+    assertJsonEquivalent(objectMapper.readTree(new File("src/test/resources/filtered-point4.json")), objectMapper.readTree(geoJsonBytes), 0.00001);
+
+    assertEquals(new String(Files.readAllBytes(Paths.get("src/test/resources/filtered-point4.wkt"))), new String(wktBytes));
 
   }
 

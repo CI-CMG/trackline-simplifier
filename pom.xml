@@ -81,6 +81,12 @@
       <groupId>org.geotools</groupId>
       <artifactId>gt-geojson</artifactId>
       <version>${geotools.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.locationtech.jts</groupId>
