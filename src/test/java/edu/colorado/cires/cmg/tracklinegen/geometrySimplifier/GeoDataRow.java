@@ -7,11 +7,27 @@ public class GeoDataRow implements DataRow {
   private Instant timeStamp;
   private Double lon1;
   private Double lat1;
+  private Double bathyTime;
 
   public GeoDataRow(Instant timeStamp, Double lon1, Double lat1) {
     this.timeStamp = timeStamp;
     this.lon1 = lon1;
     this.lat1 = lat1;
+  }
+
+  public GeoDataRow(Instant timeStamp, Double lon1, Double lat1, Double bathyTime) {
+    this.timeStamp = timeStamp;
+    this.lon1 = lon1;
+    this.lat1 = lat1;
+    this.bathyTime = bathyTime;
+  }
+
+  public Double getBathyTime() {
+    return bathyTime;
+  }
+
+  public void setBathyTime(Double bathyTime) {
+    this.bathyTime = bathyTime;
   }
 
   @Override

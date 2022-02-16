@@ -350,20 +350,14 @@ public class PointTest {
       JsonNode geoJson = objectMapper.readTree(geoJsonBytes);
       ArrayNode coordinates = (ArrayNode) geoJson.at("/geometry/coordinates");
 
-      assertEquals(2, coordinates.size());
-
       ArrayNode firstSegment = (ArrayNode) coordinates.get(0);
-      ArrayNode secondSegment = (ArrayNode) coordinates.get(1);
+      ArrayNode lastSegment = (ArrayNode) coordinates.get(coordinates.size() - 1);
 
       assertEquals(9.9601, firstSegment.get(0).get(0).doubleValue(), 0.00001);
       assertEquals(53.5301, firstSegment.get(0).get(1).doubleValue(), 0.00001);
-      assertEquals(9.9606, firstSegment.get(firstSegment.size() - 1).get(0).doubleValue(), 0.00001);
-      assertEquals(53.5302, firstSegment.get(firstSegment.size() - 1).get(1).doubleValue(), 0.00001);
 
-      assertEquals(9.9607, secondSegment.get(0).get(0).doubleValue(), 0.00001);
-      assertEquals(53.5301, secondSegment.get(0).get(1).doubleValue(), 0.00001);
-      assertEquals(9.9612, secondSegment.get(secondSegment.size() - 1).get(0).doubleValue(), 0.00001);
-      assertEquals(53.5302, secondSegment.get(secondSegment.size() - 1).get(1).doubleValue(), 0.00001);
+      assertEquals(9.9612, lastSegment.get(lastSegment.size() - 1).get(0).doubleValue(), 0.00001);
+      assertEquals(53.5302, lastSegment.get(lastSegment.size() - 1).get(1).doubleValue(), 0.00001);
 
     }
   }

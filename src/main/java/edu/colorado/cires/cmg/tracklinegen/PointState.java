@@ -6,13 +6,20 @@ public class PointState {
 
   private final Point point;
   private boolean target;
-  private boolean confirmed;
+  private boolean simplified;
   private int index;
 
   public PointState(Point point, boolean target) {
     this.point = point;
     this.target = target;
-    this.confirmed = target;
+  }
+
+  public boolean isSimplified() {
+    return simplified;
+  }
+
+  public void setSimplified(boolean simplified) {
+    this.simplified = simplified;
   }
 
   public int getIndex() {
@@ -21,18 +28,6 @@ public class PointState {
 
   public void setIndex(int index) {
     this.index = index;
-  }
-
-  public boolean isConfirmed() {
-    return confirmed;
-  }
-
-  public void setConfirmed(boolean confirmed) {
-    this.confirmed = confirmed;
-  }
-
-  public void setTarget(boolean target) {
-    this.target = target;
   }
 
   public boolean isTarget() {
