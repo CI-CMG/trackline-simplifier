@@ -21,11 +21,11 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
   private Path gsf;
   private long maxCount;
   private final GeometryFactory geometryFactory;
-  private final Predicate<DataRow> rowFilter;
+  private final Predicate<GeoDataRow> rowFilter;
 
   public GeoSimplifierProcessor(int geoJsonPrecision, long msSplit, GeometrySimplifier geometrySimplifier, int simplifierBatchSize,
       Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount, GeometryFactory geometryFactory,
-      Predicate<DataRow> rowFilter) {
+      Predicate<GeoDataRow> rowFilter) {
     this.geoJsonPrecision = geoJsonPrecision;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;

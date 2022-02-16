@@ -103,6 +103,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         if (i == 0 || coordinates.length > 2 || distance(coordinates[0], coordinates[1]) > minDistance) {
           Coordinate coordinate = coordinates[i];
           PointState pointState = new PointState(geometryFactory.createPoint(coordinate), true);
+          pointState.setSimplified(true);
           pointState.setIndex(i + startIndex);
           simplifiedSegment.add(pointState);
         }
@@ -169,14 +170,14 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     for (List<PointState> segment : segments) {
       ListIterator<PointState> it = segment.listIterator();
       int removedCount = 0;
-      boolean foundConfirmed = false;
+      boolean foundTarget = false;
       while (it.hasNext()) {
         PointState pointState = it.next();
-        if (!foundConfirmed && !pointState.isConfirmed()) {
+        if (!foundTarget && !pointState.isTarget()) {
           removedCount++;
           it.remove();
         } else {
-          foundConfirmed = true;
+          foundTarget = true;
           pointState.setIndex(pointState.getIndex() - removedCount);
         }
       }
@@ -184,7 +185,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         it = segment.listIterator(segment.size());
         while (it.hasPrevious()) {
           PointState pointState = it.previous();
-          if (!pointState.isConfirmed()) {
+          if (!pointState.isTarget()) {
             it.remove();
           } else {
             break;
@@ -295,7 +296,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private boolean shouldSplit(PointState point1, PointState point2) {
-    return isSplittingEnabled() && point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ() > msSplit;
+    return isSplittingEnabled() && !point2.isSimplified() && point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ() > msSplit;
   }
 
   private boolean isSplittingEnabled() {
