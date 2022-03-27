@@ -52,7 +52,8 @@
     <sign.serverId>gpg-sign</sign.serverId>
     <jts.version>1.16.1</jts.version>
     <geotools.version>23.5</geotools.version>
-    <jackson.version>2.11.2</jackson.version>
+    <jackson.version>2.13.2.1</jackson.version>
+    <jackson.jsr310.version>2.13.2</jackson.jsr310.version>
     <slf4j.version>1.7.30</slf4j.version>
     <javadoc.version>3.3.1</javadoc.version>
   </properties>
@@ -117,18 +118,13 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.datatype</groupId>
       <artifactId>jackson-datatype-jsr310</artifactId>
-      <version>${jackson.version}</version>
+      <version>${jackson.jsr310.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
