@@ -38,4 +38,13 @@ public class PointState {
     return point;
   }
 
+  @Override
+  public String toString() {
+    return "PointState{" +
+        "point=" + point +
+        ", target=" + target +
+        ", simplified=" + simplified +
+        ", index=" + index +
+        '}';
+  }
 }

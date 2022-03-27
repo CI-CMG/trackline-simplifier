@@ -296,7 +296,15 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private boolean shouldSplit(PointState point1, PointState point2) {
-    return isSplittingEnabled() && !point2.isSimplified() && point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ() > msSplit;
+    if(!isSplittingEnabled()) {
+      return false;
+    }
+    if(point2.isSimplified()) {
+      return point2.getIndex() == 0;
+    } else {
+      double difference = point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ();
+      return difference > msSplit;
+    }
   }
 
   private boolean isSplittingEnabled() {
