@@ -18,7 +18,7 @@ public final class AntimeridianUtils {
   private AntimeridianUtils(){
 
   }
-  public static List<Coordinate> splitAm(Coordinate coordinate, Coordinate last, GeometryFactory geometryFactory) {
+  public static List<Coordinate> splitAm(Coordinate last, Coordinate coordinate,  GeometryFactory geometryFactory) {
     double x = coordinate.getX();
     double y = coordinate.getY();
     if (x == 180D || x == -180D) {
