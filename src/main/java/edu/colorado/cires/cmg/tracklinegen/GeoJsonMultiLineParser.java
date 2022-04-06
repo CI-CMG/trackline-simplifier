@@ -1,5 +1,6 @@
 package edu.colorado.cires.cmg.tracklinegen;
 
+import static edu.colorado.cires.cmg.tracklinegen.AntimeridianUtils.getDistance;
 import static edu.colorado.cires.cmg.tracklinegen.AntimeridianUtils.splitAm;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -259,13 +260,6 @@ public class GeoJsonMultiLineParser {
       wktWriter.write(new StringBuilder().append(" ").append(format.format(value)).toString());
     }
     jsonGenerator.writeEndArray();
-  }
-
-  private double getDistance(Coordinate c1, Coordinate c2) {
-    GeodeticCalculator calc = new GeodeticCalculator(DefaultEllipsoid.WGS84);
-    calc.setStartingGeographicPoint(c1.getX(), c1.getY());
-    calc.setDestinationGeographicPoint(c2.getX(), c2.getY());
-    return calc.getOrthodromicDistance();
   }
 
   private double getSpeed(Coordinate c1, Coordinate c2, double m) throws ValidationException {

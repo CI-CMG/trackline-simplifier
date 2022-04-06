@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.geotools.referencing.GeodeticCalculator;
+import org.geotools.referencing.datum.DefaultEllipsoid;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -98,5 +100,12 @@ public final class AntimeridianUtils {
           " coordinate: " + coordinate + " last: " + last + " L1: " + l1 + " l2: " + l2);
     }
     return split;
+  }
+
+  public static double getDistance(Coordinate c1, Coordinate c2) {
+    GeodeticCalculator calc = new GeodeticCalculator(DefaultEllipsoid.WGS84);
+    calc.setStartingGeographicPoint(c1.getX(), c1.getY());
+    calc.setDestinationGeographicPoint(c2.getX(), c2.getY());
+    return calc.getOrthodromicDistance();
   }
 }
