@@ -1,5 +1,7 @@
 package edu.colorado.cires.cmg.tracklinegen;
 
+import static edu.colorado.cires.cmg.tracklinegen.AntimeridianUtils.splitAm;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -344,13 +346,13 @@ public class GeoJsonMultiLineParser {
     if (lastCoordinate == null) {
       writeArray(jsonGenerator, wktWriter, coordArray);
       if (absoluteLastCoordinate != null) {
-        List<Coordinate> split = splitAm(coordinate, absoluteLastCoordinate);
+        List<Coordinate> split = splitAm(absoluteLastCoordinate, coordinate, geometryFactory);
         if (split.size() > 1) {
           crossedAntimeridian = true;
         }
       }
     } else {
-      List<Coordinate> split = splitAm(coordinate, lastCoordinate);
+      List<Coordinate> split = splitAm(lastCoordinate, coordinate, geometryFactory);
       if (split.size() == 1) {
         wktWriter.write(","); //coordinate separator
         writeArray(jsonGenerator, wktWriter, coordArray);
@@ -391,44 +393,6 @@ public class GeoJsonMultiLineParser {
     wktWriter.write(")"); //end line string
   }
 
-  private List<Coordinate> splitAm(Coordinate coordinate, Coordinate last) {
-    double x = coordinate.getX();
-    double y = coordinate.getY();
-    if (x == 180D || x == -180D) {
-      if (last.getX() == 180D || last.getX() == -180D) {
-        return Collections.singletonList(new Coordinate(last.getX(), y, coordinate.getZ()));
-      }
-
-      double sign = Math.signum(last.getX());
-      return Arrays.asList(
-          last,
-          new Coordinate(180D * sign, y),
-          new Coordinate(180D * sign * -1, y)
-      );
-    }
-
-    List<Coordinate> split;
-    if ((coordinate.getX() < 0 && last.getX() > 0) || (coordinate.getX() > 0 && last.getX() < 0)) {
-      LineString lineString = geometryFactory.createLineString(new Coordinate[]{last, coordinate});
-      Geometry geometry = new JtsGeometry(lineString, JtsSpatialContext.GEO, true, true).getGeom();
-      if (geometry instanceof LineString) {
-        return Collections.singletonList(coordinate);
-      } else if (geometry instanceof GeometryCollection) {
-        split = geometryParse(coordinate, last, (GeometryCollection) geometry);
-      } else {
-        throw new IllegalStateException(
-            String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
-                geometry.toString(),
-                coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long) coordinate.getZ()),
-                last.getX(), last.getY(), Instant.ofEpochMilli((long) last.getZ())
-            ));
-      }
-    } else {
-      split = Collections.singletonList(coordinate);
-    }
-    return split;
-  }
-
   private void copyEverythingElse(JsonParser jsonParser, JsonGenerator jsonGenerator) throws IOException {
     jsonParser.nextToken();
     if (jsonParser.getCurrentToken() == JsonToken.START_OBJECT) {
@@ -446,51 +410,5 @@ public class GeoJsonMultiLineParser {
       throw new IllegalArgumentException("Invalid geojson type for AM splitting: " + value);
     }
     return value;
-  }
-
-  private Coordinate resolveCoordinate(LineString lineString, Coordinate last) {
-    if (lineString.getCoordinateN(0).equals(last)) {
-      return lineString.getCoordinateN(1);
-    }
-    return lineString.getCoordinateN(0);
-  }
-
-  private List<Coordinate> geometryParse(Coordinate coordinate, Coordinate last, GeometryCollection geometry) {
-    Geometry l1 = geometry.getGeometryN(0);
-    Geometry l2 = geometry.getGeometryN(1);
-
-    if (l1 instanceof LineString && l2 instanceof LineString) {
-      return geometryParse(coordinate, last, (LineString) l1, (LineString) l2, geometry);
-    } else if (l1 instanceof LineString && l2 instanceof Point) {
-      return Collections.singletonList(resolveCoordinate((LineString) l1, last));
-    } else if (l2 instanceof LineString && l1 instanceof Point) {
-      return Collections.singletonList(resolveCoordinate((LineString) l2, last));
-    } else {
-      throw new IllegalStateException(
-          String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
-              geometry.toString(),
-              coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long) coordinate.getZ()),
-              last.getX(), last.getY(), Instant.ofEpochMilli((long) last.getZ())
-          ));
-    }
-  }
-
-  private List<Coordinate> geometryParse(Coordinate coordinate, Coordinate last, LineString l1, LineString l2, Geometry geometry) {
-    List<Coordinate> split = new ArrayList<>(4);
-    if (l1.getCoordinateN(0).equals(last) || l2.getCoordinateN(1).equals(coordinate)) {
-      split.add(l1.getCoordinateN(0));
-      split.add(l1.getCoordinateN(1));
-      split.add(l2.getCoordinateN(0));
-      split.add(l2.getCoordinateN(1));
-    } else if (l2.getCoordinateN(0).equals(last) || l1.getCoordinateN(1).equals(coordinate)) {
-      split.add(l2.getCoordinateN(0));
-      split.add(l2.getCoordinateN(1));
-      split.add(l1.getCoordinateN(0));
-      split.add(l1.getCoordinateN(1));
-    } else {
-      throw new IllegalStateException("Unable to determine AM split order: " + geometry +
-          " coordinate: " + coordinate + " last: " + last + " L1: " + l1 + " l2: " + l2);
-    }
-    return split;
   }
 }
