@@ -354,7 +354,7 @@ public class FnvSplittingTest {
   }
 
   @Test
-  public void testDrunkAmWondering() throws Exception {
+  public void testDrunkAmWandering() throws Exception {
     List<Path> fnvFiles;
     try(Stream<Path> stream = Files.list(Paths.get("src/test/resources/fnv_am/KM0625"))) {
       fnvFiles = stream.filter(f -> f.toString().endsWith(".mb56.fnv")).sorted().collect(Collectors.toList());
