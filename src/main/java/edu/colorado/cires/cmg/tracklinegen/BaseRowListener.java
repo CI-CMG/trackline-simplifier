@@ -92,11 +92,79 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     return segments;
   }
 
+  private enum Sign {
+    POSITIVE,
+    NEGATIVE
+  }
+
+  private static Sign findPreviousSign(List<Coordinate> coordinates, int index) {
+    Sign sign = null;
+    for (int i = index - 1; i >= 0; i--) {
+      Coordinate coordinate = coordinates.get(i);
+      if(!is180(coordinate)) {
+        sign = coordinate.getX() < 0D ? Sign.NEGATIVE : Sign.POSITIVE;
+        break;
+      }
+    }
+    return sign;
+  }
+
+  private static Sign findNextSign(List<Coordinate> coordinates, int index) {
+    Sign sign = null;
+    for (int i = index + 1; i < coordinates.size(); i++) {
+      Coordinate coordinate = coordinates.get(i);
+      if(!is180(coordinate)) {
+        sign = coordinate.getX() < 0D ? Sign.NEGATIVE : Sign.POSITIVE;
+        break;
+      }
+    }
+    return sign;
+  }
+
+  private static boolean is180(Coordinate coordinate) {
+    return Math.abs(coordinate.getX()) - 180D == 0D;
+  }
+
+  private static List<Coordinate> correctSigns(List<Coordinate> coordinates) {
+    List<Coordinate> corrected = new ArrayList<>(coordinates.size());
+    for (int i = 0; i < coordinates.size(); i++) {
+      Coordinate coordinate = coordinates.get(i);
+
+      if(is180(coordinate)) {
+        Sign sign = findPreviousSign(coordinates, i);
+        if(sign == null) {
+          sign = findNextSign(coordinates, i);
+        } if (sign == null) {
+          sign = Sign.POSITIVE;
+        }
+        double correctedX;
+        switch (sign) {
+          case NEGATIVE:
+            correctedX = -180D;
+            break;
+          case POSITIVE:
+            correctedX = 180D;
+            break;
+          default:
+            throw new IllegalStateException("This will never happen");
+        }
+        double y = coordinate.getY();
+        double time = coordinate.getZ();
+        corrected.add(new Coordinate(correctedX, y, time));
+      } else {
+        corrected.add(coordinate);
+      }
+
+    }
+    return corrected;
+  }
+
   private List<PointState> simplifySegment(List<PointState> segment) {
     List<PointState> simplifiedSegment;
     if (segment.size() > 1) {
       int startIndex = segment.get(0).getIndex();
-      LineString simplified = simplify(segment.stream().map(PointState::getPoint).map(Point::getCoordinate).collect(Collectors.toList()));
+      LineString simplified = simplify(
+          correctSigns(segment.stream().map(PointState::getPoint).map(Point::getCoordinate).collect(Collectors.toList())));
       Coordinate[] coordinates = simplified.getCoordinateSequence().toCoordinateArray();
       simplifiedSegment = new ArrayList<>();
       for (int i = 0; i < coordinates.length; i++) {
@@ -248,7 +316,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   private void writeFinalSegments(List<List<PointState>> segments) {
     List<List<PointState>> lastSingleton = writeSegments(segments);
-    if(lastSingleton.get(0).get(0).getIndex() > 0) {
+    if (lastSingleton.get(0).get(0).getIndex() > 0) {
       incrementSimplifiedPointCount();
       writeCoordinate(lastSingleton.get(0).get(0).getPoint().getCoordinate());
       lineWriter.endLine();
@@ -267,10 +335,10 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       lineString = true;
     } else {
       int count = segments.stream().map(List::size).reduce(0, Integer::sum);
-      if(count > 1) {
+      if (count > 1) {
         writeFinalSegments(segments);
         lineString = true;
-      } else if (count == 1){
+      } else if (count == 1) {
         lineWriter.startPoint();
         started = true;
         incrementSimplifiedPointCount();
@@ -296,10 +364,10 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private boolean shouldSplit(PointState point1, PointState point2) {
-    if(!isSplittingEnabled()) {
+    if (!isSplittingEnabled()) {
       return false;
     }
-    if(point2.isSimplified()) {
+    if (point2.isSimplified()) {
       return point2.getIndex() == 0;
     } else {
       double difference = point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ();

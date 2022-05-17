@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -347,6 +349,23 @@ public class FnvSplittingTest {
     generateGeometryFiles(fnvFiles, geoJsonPath, wktPath);
 
     JsonNode expected = objectMapper.readTree(new File("src/test/resources/fnv/expected1.json"));
+    JsonNode actual = objectMapper.readTree(geoJsonPath.toFile());
+    assertJsonEquivalent(expected, actual, 0.00001);
+  }
+
+  @Test
+  public void testDrunkAmWondering() throws Exception {
+    List<Path> fnvFiles;
+    try(Stream<Path> stream = Files.list(Paths.get("src/test/resources/fnv_am/KM0625"))) {
+      fnvFiles = stream.filter(f -> f.toString().endsWith(".mb56.fnv")).sorted().collect(Collectors.toList());
+    }
+    Path geoJsonPath = Paths.get("target/fnv/fnv.json");
+    Path wktPath = Paths.get("target/fnv/fnv.wkt");
+    FileUtils.deleteQuietly(geoJsonPath.toFile());
+    FileUtils.deleteQuietly(wktPath.toFile());
+    generateGeometryFiles(fnvFiles, geoJsonPath, wktPath);
+
+    JsonNode expected = objectMapper.readTree(new File("src/test/resources/fnv/expected2.json"));
     JsonNode actual = objectMapper.readTree(geoJsonPath.toFile());
     assertJsonEquivalent(expected, actual, 0.00001);
   }
