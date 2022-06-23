@@ -1,6 +1,8 @@
 package edu.colorado.cires.cmg.tracklinegen.test;
 
 import static edu.colorado.cires.cmg.tracklinegen.JsonPropertiesUtils.assertJsonEquivalent;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -33,6 +35,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -232,7 +235,7 @@ public class FnvSplittingTest {
     @Override
     protected List<FnvRowListener> createRowListeners(FnvTracklineContext context) {
       return Collections.singletonList(
-          new FnvRowListener(msSplit, geometrySimplifier, context.getLineWriter(), batchSize, geometryFactory, precision));
+          new FnvRowListener(msSplit, geometrySimplifier, context.getLineWriter(), batchSize, geometryFactory, precision, maxAllowedSpeedKnts));
     }
 
     @Override
@@ -283,8 +286,8 @@ public class FnvSplittingTest {
   private static class FnvRowListener extends BaseRowListener<FnvDataRow> {
 
     public FnvRowListener(long msSplit, GeometrySimplifier geometrySimplifier, GeoJsonMultiLineWriter lineWriter, int batchSize,
-        GeometryFactory geometryFactory, int precision) {
-      super(msSplit, geometrySimplifier, lineWriter, batchSize, x -> true, 0, geometryFactory, precision);
+        GeometryFactory geometryFactory, int precision, double maxAllowedSpeedKnts) {
+      super(msSplit, geometrySimplifier, lineWriter, batchSize, x -> true, 0, geometryFactory, precision, maxAllowedSpeedKnts);
     }
   }
 
@@ -369,5 +372,113 @@ public class FnvSplittingTest {
     JsonNode actual = objectMapper.readTree(geoJsonPath.toFile());
     assertJsonEquivalent(expected, actual, 0.00001);
   }
+
+  private static class FileSorter implements Comparable<FileSorter> {
+    private final Instant timestamp;
+    private final Path file;
+
+    public FileSorter(Instant timestamp, Path file) {
+      this.timestamp = timestamp;
+      this.file = file;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) {
+        return true;
+      }
+      if (o == null || getClass() != o.getClass()) {
+        return false;
+      }
+      FileSorter that = (FileSorter) o;
+      return Objects.equals(timestamp, that.timestamp) && Objects.equals(file, that.file);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(timestamp, file);
+    }
+
+    @Override
+    public int compareTo(FileSorter o) {
+      return timestamp.compareTo(o.timestamp);
+    }
+
+    public Instant getTimestamp() {
+      return timestamp;
+    }
+
+    public Path getFile() {
+      return file;
+    }
+  }
+
+  @Test
+  public void testDrunkAmWandering2() throws Exception {
+    TreeSet<FileSorter> fnvFiles = new TreeSet<>();
+    try(Stream<Path> stream = Files.list(Paths.get("src/test/resources/fnv_am/KM0625_2"))) {
+      stream.filter(f -> f.getFileName().toString().startsWith("em120-254") && f.getFileName().toString().endsWith(".mb56.fnv"))
+          .forEach(f -> {
+            Instant timestamp = null;
+            try(BufferedReader reader = Files.newBufferedReader(f)) {
+              String firstRow = reader.readLine();
+              if(firstRow != null) {
+                String[] split = firstRow.split("\\t");
+                  timestamp = Instant.ofEpochMilli((long)(Double.parseDouble(split[1]) * 1000));
+              }
+            } catch (IOException e) {
+              throw new IllegalStateException(e);
+            }
+            if(timestamp != null) {
+              fnvFiles.add(new FileSorter(timestamp, f));
+            }
+          });
+    }
+    Path geoJsonPath = Paths.get("target/fnv/fnv.json");
+    Path wktPath = Paths.get("target/fnv/fnv.wkt");
+    FileUtils.deleteQuietly(geoJsonPath.toFile());
+    FileUtils.deleteQuietly(wktPath.toFile());
+    generateGeometryFiles(fnvFiles.stream().map(FileSorter::getFile).collect(Collectors.toList()), geoJsonPath, wktPath);
+
+    JsonNode expected = objectMapper.readTree(new File("src/test/resources/fnv/expected3.json"));
+    JsonNode actual = objectMapper.readTree(geoJsonPath.toFile());
+    assertJsonEquivalent(expected, actual, 0.00001);
+    assertEquals(
+        new String(Files.readAllBytes(Paths.get("src/test/resources/fnv/expected3.wkt"))),
+        new String(Files.readAllBytes(wktPath)));
+  }
+
+  @Test
+  public void testDrunkAmWanderingBad() throws Exception {
+    TreeSet<FileSorter> fnvFiles = new TreeSet<>();
+    try(Stream<Path> stream = Files.list(Paths.get("src/test/resources/fnv_am/KM0625_BAD"))) {
+      stream.filter(f -> f.getFileName().toString().startsWith("em120-254") && f.getFileName().toString().endsWith(".mb56.fnv"))
+          .forEach(f -> {
+            Instant timestamp = null;
+            try(BufferedReader reader = Files.newBufferedReader(f)) {
+              String firstRow = reader.readLine();
+              if(firstRow != null) {
+                String[] split = firstRow.split("\\t");
+                timestamp = Instant.ofEpochMilli((long)(Double.parseDouble(split[1]) * 1000));
+              }
+            } catch (IOException e) {
+              throw new IllegalStateException(e);
+            }
+            if(timestamp != null) {
+              fnvFiles.add(new FileSorter(timestamp, f));
+            }
+          });
+    }
+    Path geoJsonPath = Paths.get("target/fnv/fnv.json");
+    Path wktPath = Paths.get("target/fnv/fnv.wkt");
+    FileUtils.deleteQuietly(geoJsonPath.toFile());
+    FileUtils.deleteQuietly(wktPath.toFile());
+
+    assertThrows(Exception.class, () -> {
+      generateGeometryFiles(fnvFiles.stream().map(FileSorter::getFile).collect(Collectors.toList()), geoJsonPath, wktPath);
+    });
+  }
+
+
 
 }

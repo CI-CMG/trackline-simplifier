@@ -19,6 +19,7 @@ public class TracklineProcessorTest {
 
   private final ObjectMapper objectMapper = new ObjectMapper();
   private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+  private final double maxAllowedSpeedKnts = 60D;
 
   @Test
   public void test() throws Exception {
@@ -40,7 +41,7 @@ public class TracklineProcessorTest {
     String gsf = actualDir + "/geoSimplfied.json";
 
     GeoSimplifierProcessor tracklineProcessor = new GeoSimplifierProcessor(geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize,
-        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory, row -> true);
+        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory, row -> true, maxAllowedSpeedKnts);
 
     tracklineProcessor.process();
 
@@ -69,7 +70,7 @@ public class TracklineProcessorTest {
     String gsf = actualDir + "/geoSimplfied.json";
 
     GeoSimplifierProcessor tracklineProcessor = new GeoSimplifierProcessor(geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize,
-        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory, row -> false);
+        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory, row -> false, maxAllowedSpeedKnts);
 
     tracklineProcessor.process();
 
@@ -98,7 +99,7 @@ public class TracklineProcessorTest {
     String gsf = actualDir + "/geoSimplfied.json";
 
     GeoSimplifierProcessor tracklineProcessor = new GeoSimplifierProcessor(geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize,
-        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory, row -> true);
+        dataFile, objectMapper, Paths.get(gsf), maxCount, geometryFactory, row -> true, maxAllowedSpeedKnts);
 
     SimplifiedPointCountExceededException ex = assertThrows(SimplifiedPointCountExceededException.class, () -> tracklineProcessor.process());
 

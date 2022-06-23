@@ -10,7 +10,7 @@ public class GsBaseRowListener extends BaseRowListener<GeoDataRow> {
 
   public GsBaseRowListener(long msSplit, GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter, int batchSize, long maxCount,
-      GeometryFactory geometryFactory, int geoJsonPrecision, Predicate<GeoDataRow> rowFilter) {
+      GeometryFactory geometryFactory, int geoJsonPrecision, Predicate<GeoDataRow> rowFilter, double maxAllowedSpeedKnts) {
     super(msSplit,
         geometrySimplifier,
         lineWriter,
@@ -18,6 +18,7 @@ public class GsBaseRowListener extends BaseRowListener<GeoDataRow> {
         rowFilter,
         maxCount,
         geometryFactory,
-        geoJsonPrecision);
+        geoJsonPrecision,
+       maxAllowedSpeedKnts);
   }
 }

@@ -7,10 +7,10 @@
 				[-175, 5],
 				[-177, 3],
 				[-179, 1],
-				[-180, 0]
+				[-180, 0],
+				[-180, -1]
 			],
 			[
-				[180, 0],
 				[180, -1],
 				[178, -3],
 				[176, -5]
@@ -19,8 +19,8 @@
 	},
 	"bbox": [176, -5, -175, 5],
 	"properties": {
-		"distanceM": 1364834.5838979909,
-		"avgSpeedMPS": 35782288.35850185,
+		"distanceM": 1521734.1521893311,
+		"avgSpeedMPS": 32433566.436940543,
 		"unsimplifiedPointCount": 23,
 		"simplifiedPointCount": 7,
 		"targetPointCount": 22

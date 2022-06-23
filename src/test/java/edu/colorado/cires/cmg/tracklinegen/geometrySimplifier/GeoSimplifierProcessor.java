@@ -22,10 +22,11 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
   private long maxCount;
   private final GeometryFactory geometryFactory;
   private final Predicate<GeoDataRow> rowFilter;
+  private final double maxAllowedSpeedKnts;
 
   public GeoSimplifierProcessor(int geoJsonPrecision, long msSplit, GeometrySimplifier geometrySimplifier, int simplifierBatchSize,
       Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount, GeometryFactory geometryFactory,
-      Predicate<GeoDataRow> rowFilter) {
+      Predicate<GeoDataRow> rowFilter, double maxAllowedSpeedKnts) {
     this.geoJsonPrecision = geoJsonPrecision;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
@@ -36,6 +37,7 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
     this.maxCount = maxCount;
     this.geometryFactory = geometryFactory;
     this.rowFilter = rowFilter;
+    this.maxAllowedSpeedKnts = maxAllowedSpeedKnts;
   }
 
   @Override
@@ -53,7 +55,8 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
         maxCount,
         geometryFactory,
         geoJsonPrecision,
-        rowFilter
+        rowFilter,
+        maxAllowedSpeedKnts
         )
     );
   }

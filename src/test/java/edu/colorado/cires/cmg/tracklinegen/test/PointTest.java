@@ -160,7 +160,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> true);
+        row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -204,7 +204,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> true);
+        row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -248,7 +248,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> true);
+        row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -290,7 +290,7 @@ public class PointTest {
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
           geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-          row -> true);
+          row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -332,7 +332,7 @@ public class PointTest {
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
           geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-          row -> true);
+          row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -384,7 +384,7 @@ public class PointTest {
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
           geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-          row -> true);
+          row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -424,7 +424,7 @@ public class PointTest {
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
           geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-          row -> true);
+          row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -464,7 +464,7 @@ public class PointTest {
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
           geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-          row -> true);
+          row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
       final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -509,7 +509,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, (int) simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> true);
+        row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -550,7 +550,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> true);
+        row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -594,7 +594,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> true);
+        row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -637,7 +637,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> true);
+        row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
@@ -680,7 +680,7 @@ public class PointTest {
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
         geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
-        row -> false);
+        row -> false, maxAllowedSpeedKnts);
     phase1.process();
 
     final ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();

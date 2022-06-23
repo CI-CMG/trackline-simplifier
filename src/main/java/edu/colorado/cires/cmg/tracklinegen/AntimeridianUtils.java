@@ -17,43 +17,84 @@ import org.locationtech.spatial4j.context.jts.JtsSpatialContext;
 import org.locationtech.spatial4j.shape.jts.JtsGeometry;
 
 public final class AntimeridianUtils {
+
+  private static final double METERS_PER_NMILE = 1852D;
+  private static final double SECONDS_PER_HOUR = 3600D;
+  private static final double KN_PER_MPS = SECONDS_PER_HOUR / METERS_PER_NMILE;
+
   private AntimeridianUtils(){
 
   }
-  public static List<Coordinate> splitAm(Coordinate last, Coordinate coordinate,  GeometryFactory geometryFactory) {
-    double x = coordinate.getX();
-    double y = coordinate.getY();
-    if (x == 180D || x == -180D) {
-      if (last.getX() == 180D || last.getX() == -180D) {
-        return Collections.singletonList(new Coordinate(last.getX(), y, coordinate.getZ()));
-      }
 
-      double sign = Math.signum(last.getX());
+  private static boolean signsEqual(double s1, double s2) {
+   return ((s1 < 0D && s2 < 0D) || (s1 > 0D && s2 > 0D) || (s1 == 0D && s2 == 0D));
+  }
+
+  private static double mpsToKnots(double metersPerSecond) {
+    return metersPerSecond * KN_PER_MPS;
+  }
+
+  public static double getSpeed(double maxAllowedSpeedKnts, Coordinate c1, Coordinate c2, double m) throws ValidationException {
+    double s = (c2.getZ() - c1.getZ()) / 1000D;
+    double metersPerSecond = m / s;
+
+    double knots = mpsToKnots(metersPerSecond);
+    if (maxAllowedSpeedKnts > 0 && knots > maxAllowedSpeedKnts) {
+      throw new ValidationException(
+          String.format("Speed from (%f, %f, %s) to (%f, %f, %s) was %f knots, which exceeded allowed maximum of %f knots",
+              c1.getX(), c1.getY(), Instant.ofEpochMilli((long) c1.getZ()),
+              c2.getX(), c2.getY(), Instant.ofEpochMilli((long) c2.getZ()),
+              knots,
+              maxAllowedSpeedKnts
+          ));
+    }
+    return metersPerSecond;
+  }
+
+  private static boolean is180(Coordinate coordinate) {
+    return coordinate.getX() == 180D || coordinate.getX() == -180D;
+  }
+
+  public static List<Coordinate> splitAm(Coordinate last,  Coordinate current, GeometryFactory geometryFactory) {
+
+    double lastSign = Math.signum(last.getX());
+    double currentSign = Math.signum(current.getX());
+
+    if (is180(last)) {
+      if (is180(current)) {
+        return Collections.singletonList(new Coordinate(last.getX(), current.getY(), current.getZ()));
+      }
+      if(signsEqual(lastSign, currentSign)) {
+        return Collections.singletonList(current);
+      }
       return Arrays.asList(
-          last,
-          new Coordinate(180D * sign, y),
-          new Coordinate(180D * sign * -1, y)
+          current,
+          new Coordinate(180D * lastSign, last.getY()),
+          new Coordinate(180D * currentSign, last.getY())
       );
+    }
+    if (is180(current)) {
+      return Collections.singletonList(new Coordinate(180D * lastSign, current.getY(), current.getZ()));
     }
 
     List<Coordinate> split;
-    if ((coordinate.getX() < 0 && last.getX() > 0) || (coordinate.getX() > 0 && last.getX() < 0)) {
-      LineString lineString = geometryFactory.createLineString(new Coordinate[]{last, coordinate});
+    if ((current.getX() < 0 && last.getX() > 0) || (current.getX() > 0 && last.getX() < 0)) {
+      LineString lineString = geometryFactory.createLineString(new Coordinate[]{last, current});
       Geometry geometry = new JtsGeometry(lineString, JtsSpatialContext.GEO, true, true).getGeom();
       if (geometry instanceof LineString) {
-        return Collections.singletonList(coordinate);
+        return Collections.singletonList(current);
       } else if (geometry instanceof GeometryCollection) {
-        split = geometryParse(coordinate, last, (GeometryCollection) geometry);
+        split = geometryParse(current, last, (GeometryCollection) geometry);
       } else {
         throw new IllegalStateException(
             String.format("An error occurred splitting AM, type: %s from coordinates (%f, %f, %s) to (%f, %f, %s)",
                 geometry.toString(),
-                coordinate.getX(), coordinate.getY(), Instant.ofEpochMilli((long) coordinate.getZ()),
+                current.getX(), current.getY(), Instant.ofEpochMilli((long) current.getZ()),
                 last.getX(), last.getY(), Instant.ofEpochMilli((long) last.getZ())
             ));
       }
     } else {
-      split = Collections.singletonList(coordinate);
+      split = Collections.singletonList(current);
     }
     return split;
   }
