@@ -1,10 +1,12 @@
 package edu.colorado.cires.cmg.tracklinegen;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
+import static edu.colorado.cires.cmg.tracklinegen.AntimeridianUtils.getDistance;
+import static edu.colorado.cires.cmg.tracklinegen.AntimeridianUtils.getSpeed;
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
@@ -23,6 +25,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private final GeoJsonMultiLineWriter lineWriter;
   private final int batchSize;
   private final long maxAllowedSimplifiedPoints;
+  private final double maxAllowedSpeedKnts;
 
   private long unsimplifiedPointCount = 0;
   private long simplifiedPointCount = 0;
@@ -35,7 +38,20 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private final double minDistance;
   private final DecimalFormat format;
 
-
+  /**
+   *
+   * @param msSplit
+   * @param geometrySimplifier
+   * @param lineWriter
+   * @param batchSize
+   * @param filterRow
+   * @param maxAllowedSimplifiedPoints
+   * @param geometryFactory
+   * @param geoJsonPrecision
+   * @deprecated Use {@link BaseRowListener#BaseRowListener(long, GeometrySimplifier, GeoJsonMultiLineWriter, int, Predicate, long, GeometryFactory, int, double)}
+   *
+   */
+  @Deprecated
   public BaseRowListener(
       long msSplit,
       GeometrySimplifier geometrySimplifier,
@@ -46,6 +62,21 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       GeometryFactory geometryFactory,
       int geoJsonPrecision
   ) {
+    this(msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
+  }
+
+  public BaseRowListener(
+      long msSplit,
+      GeometrySimplifier geometrySimplifier,
+      GeoJsonMultiLineWriter lineWriter,
+      int batchSize,
+      Predicate<T> filterRow,
+      long maxAllowedSimplifiedPoints,
+      GeometryFactory geometryFactory,
+      int geoJsonPrecision,
+      double maxAllowedSpeedKnts
+  ) {
+
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
     this.lineWriter = lineWriter;
@@ -59,6 +90,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       sb.append("#");
     }
     format = new DecimalFormat(sb.toString(), DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+    this.maxAllowedSpeedKnts = maxAllowedSpeedKnts;
   }
 
   @Override
@@ -125,7 +157,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     return Math.abs(coordinate.getX()) - 180D == 0D;
   }
 
-  private static List<Coordinate> correctSigns(List<Coordinate> coordinates) {
+  private List<Coordinate> correctSigns(List<Coordinate> coordinates) {
     List<Coordinate> corrected = new ArrayList<>(coordinates.size());
     for (int i = 0; i < coordinates.size(); i++) {
       Coordinate coordinate = coordinates.get(i);
@@ -150,13 +182,45 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         }
         double y = coordinate.getY();
         double time = coordinate.getZ();
-        corrected.add(new Coordinate(correctedX, y, time));
+
+        Coordinate c2 = new Coordinate(correctedX, y, time);
+
+        if(i > 0) {
+          Coordinate c1 = corrected.get(i - 1);
+          double m = getDistance(c1, c2);
+          try {
+            getSpeed(maxAllowedSpeedKnts, c1, c2, m);
+          } catch (ValidationException e) {
+            throw new IllegalStateException("Invalid speed", e);
+          }
+        }
+
+
+        corrected.add(c2);
+
+
+
       } else {
+        if(i > 0) {
+          Coordinate c1 = corrected.get(i - 1);
+          double m = getDistance(c1, coordinate);
+          try {
+            getSpeed(maxAllowedSpeedKnts, c1, coordinate, m);
+          } catch (ValidationException e) {
+            throw new IllegalStateException("Invalid speed", e);
+          }
+        }
+
         corrected.add(coordinate);
       }
 
     }
     return corrected;
+  }
+
+  private LineString correctSigns(LineString lineString) {
+    List<Coordinate> corrected = correctSigns(Arrays.asList(lineString.getCoordinates()));
+    return geometryFactory.createLineString(corrected.toArray(new Coordinate[0]));
   }
 
   private List<PointState> simplifySegment(List<PointState> segment) {
@@ -165,6 +229,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       int startIndex = segment.get(0).getIndex();
       LineString simplified = simplify(
           correctSigns(segment.stream().map(PointState::getPoint).map(Point::getCoordinate).collect(Collectors.toList())));
+      simplified = correctSigns(simplified);
       Coordinate[] coordinates = simplified.getCoordinateSequence().toCoordinateArray();
       simplifiedSegment = new ArrayList<>();
       for (int i = 0; i < coordinates.length; i++) {

@@ -27,7 +27,7 @@ public class BathRowListenerTest {
   final double tol = 0.0001;
   private final GeometrySimplifier geometrySimplifier = new GeometrySimplifier(tol);
   private final ObjectMapper objectMapper = new ObjectMapper();
-
+  private double maxAllowedSpeedKnts = 0D;
 
   @Test
   public void testEmpty() throws Exception {
@@ -47,7 +47,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -106,7 +107,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -154,7 +156,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -214,7 +217,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -288,7 +292,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -364,7 +369,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -432,7 +438,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -498,7 +505,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -542,7 +550,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
@@ -601,7 +610,8 @@ public class BathRowListenerTest {
           maxCount,
           geometryFactory,
           geoJsonPrecision,
-          r -> r.getBathyTime() != null
+          r -> r.getBathyTime() != null,
+          maxAllowedSpeedKnts
       );
       listener.start();
       rows.forEach(listener::processRow);
