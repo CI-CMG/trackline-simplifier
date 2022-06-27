@@ -71,7 +71,7 @@ public class Phase2GeometryTest {
     String expectedDir = baseDir + "expected";
     JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
     JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
-    assertEquals(expected, actual);
+    assertJsonEquivalent(expected, actual, 0.00001);
 
     BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
     BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
