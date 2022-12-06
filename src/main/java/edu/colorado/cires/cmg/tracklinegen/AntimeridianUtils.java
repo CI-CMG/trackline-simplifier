@@ -36,6 +36,9 @@ public final class AntimeridianUtils {
 
   public static double getSpeed(double maxAllowedSpeedKnts, Coordinate c1, Coordinate c2, double m) throws ValidationException {
     double s = (c2.getZ() - c1.getZ()) / 1000D;
+    if (s == 0D && m == 0D) {
+        return 0D;  //allow duplicate points
+    }
     double metersPerSecond = m / s;
 
     double knots = mpsToKnots(metersPerSecond);
