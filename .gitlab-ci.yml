@@ -1,0 +1,12 @@
+stages:
+  - build
+
+image: artifacts.ncei.noaa.gov/ncei/java-builder:asettings
+build:
+  stage: build
+  script:
+    - 'mvn -s gitlab-ci-settings.xml clean deploy -Daws.region=us-west-2'
+  only:
+    - trunk
+    - /^v[0-9]+\.[0-9]+\.[0-9]+$/
+    - /^[0-9]+\.[0-9]+$/
