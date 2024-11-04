@@ -23,4 +23,20 @@
         <packageUrl regex="true">^pkg:maven/org\.eclipse\.emf/org\.eclipse\.emf\.ecore@.*$</packageUrl>
         <cve>CVE-2023-4218</cve>
     </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: org.eclipse.emf.ecore.xmi-2.15.0.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.emf/org\.eclipse\.emf\.ecore\.xmi@.*$</packageUrl>
+        <cve>CVE-2023-4218</cve>
+    </suppress>
+
+    <suppress>
+        <notes><![CDATA[
+   file name: org.eclipse.emf.common-2.15.0.jar
+   ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.eclipse\.emf/org\.eclipse\.emf\.common@.*$</packageUrl>
+        <cve>CVE-2023-4218</cve>
+    </suppress>
 </suppressions>
