@@ -247,7 +247,7 @@
           <releaseProfiles>release,site-publish</releaseProfiles>
           <goals>deploy site</goals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
-          <arguments>-Pdep-check -D${sign.serverId}</arguments>
+          <arguments>-D${sign.serverId}</arguments>
         </configuration>
       </plugin>
 
