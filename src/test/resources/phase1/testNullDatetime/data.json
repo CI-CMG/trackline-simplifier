@@ -1,0 +1,177 @@
+[
+  {
+    "timestamp": "",
+    "lat": 21.31367,
+    "lon": -157.88034,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": 21.3075,
+    "lon": -157.89551,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": 21.30076,
+    "lon": -157.89037,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": 21.27442,
+    "lon": -157.89187,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": 21.27182,
+    "lon": -157.89206,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": 21.20582,
+    "lon": -157.90451,
+    "bathyTypeCode": 1,
+    "magTotal": 36306.0,
+    "magDiurnalCorr": -218.0
+  },
+  {
+    "timestamp": "",
+    "lat": 21.1744,
+    "lon": -157.91044,
+    "bathyTypeCode": 1,
+    "magTotal": 36205.0,
+    "magDiurnalCorr": -309.0
+  },
+  {
+    "timestamp": "",
+    "lat": 21.15868,
+    "lon": -157.9134,
+    "bathyTypeCode": 1,
+    "magTotal": 36220.0,
+    "magDiurnalCorr": -288.0
+  },
+  {
+    "timestamp": "",
+    "lat": 21.14297,
+    "lon": -157.91637,
+    "bathyTypeCode": 1,
+    "magTotal": 36089.0,
+    "magDiurnalCorr": -414.0
+  },
+  {
+    "timestamp": "",
+    "lat": -15.34297,
+    "lon": 167.37895,
+    "bathyTime": 1.283,
+    "bathyCorrectedDepth": 960.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.33683,
+    "lon": 167.39118,
+    "bathyTime": 1.313,
+    "bathyCorrectedDepth": 982.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.33658,
+    "lon": 167.39168,
+    "bathyTypeCode": 1,
+    "magTotal": 44190.0,
+    "magDiurnalCorr": -171.0
+  },
+  {
+    "timestamp": "",
+    "lat": -15.33332,
+    "lon": 167.39818,
+    "bathyTime": 1.36,
+    "bathyCorrectedDepth": 1017.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.31802,
+    "lon": 167.42864,
+    "bathyTime": 2.22,
+    "bathyCorrectedDepth": 1655.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.31777,
+    "lon": 167.42914,
+    "bathyTypeCode": 1,
+    "magTotal": 44208.0,
+    "magDiurnalCorr": -135.0
+  },
+  {
+    "timestamp": "",
+    "lat": -15.29934,
+    "lon": 167.46585,
+    "bathyTime": 2.875,
+    "bathyCorrectedDepth": 2144.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.29896,
+    "lon": 167.4666,
+    "bathyTypeCode": 1,
+    "magTotal": 44185.0,
+    "magDiurnalCorr": -139.0
+  },
+  {
+    "timestamp": "",
+    "lat": -15.29144,
+    "lon": 167.48158,
+    "bathyTime": 3.153,
+    "bathyCorrectedDepth": 2352.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.2868,
+    "lon": 167.49082,
+    "bathyTime": 3.202,
+    "bathyCorrectedDepth": 2388.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.28041,
+    "lon": 167.50356,
+    "bathyTime": 3.484,
+    "bathyCorrectedDepth": 2599.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  },
+  {
+    "timestamp": "",
+    "lat": -15.28015,
+    "lon": 167.50406,
+    "bathyTypeCode": 1,
+    "magTotal": 44158.0,
+    "magDiurnalCorr": -147.0
+  },
+  {
+    "timestamp": "",
+    "lat": -15.26825,
+    "lon": 167.52778,
+    "bathyTime": 3.866,
+    "bathyCorrectedDepth": 2887.0,
+    "bathyCorrectionCode": 41,
+    "bathyTypeCode": 1
+  }
+]
