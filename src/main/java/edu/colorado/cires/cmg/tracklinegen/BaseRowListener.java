@@ -5,6 +5,7 @@ import static edu.colorado.cires.cmg.tracklinegen.AntimeridianUtils.getSpeed;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -472,7 +473,13 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private Coordinate toCoordinate(T row) {
-    return new Coordinate(round(row.getLon()), round(row.getLat()), row.getTimestamp().toEpochMilli());
+    if (row.getTimestamp() == null) {
+      return new Coordinate(round(row.getLon()), round(row.getLat()));
+    }
+
+    else {
+      return new Coordinate(round(row.getLon()), round(row.getLat()), row.getTimestamp().toEpochMilli());
+    }
   }
 
   private LineString simplify(List<Coordinate> coordinates) {
