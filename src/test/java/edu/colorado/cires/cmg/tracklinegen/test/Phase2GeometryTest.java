@@ -191,4 +191,33 @@ public class Phase2GeometryTest {
         exception.getMessage());
 
   }
+
+  @Test
+  public void testNullDatetime() throws Exception {
+    String baseDir = "target/test-classes/phase2/testNullDatetime/";
+    String actualDir = baseDir + "actual";
+    File directory = new File(actualDir);
+    if (!directory.exists()) {
+      directory.mkdir();
+    }
+
+    Path gsf = Paths.get(baseDir + "geometry/all.geojson");
+    String geoJsonFile = actualDir + "/all.geojson";
+    String wktFile = actualDir + "/all.wkt";
+    int geoJsonPrecision = 5;
+    double maxAllowedSpeedKnts = 0D;
+
+    GeoJsonProcessor geoJsonProcessor = new GeoJsonProcessor(gsf, Paths.get(geoJsonFile), Paths.get(wktFile),
+            objectMapper, geoJsonPrecision, maxAllowedSpeedKnts);
+    geoJsonProcessor.process();
+
+    String expectedDir = baseDir + "expected";
+    JsonNode expected = objectMapper.readTree(new File(expectedDir + "/all.geojson"));
+    JsonNode actual = objectMapper.readTree(new File(geoJsonFile));
+    assertJsonEquivalent(expected, actual, 0.00001);
+
+    BufferedReader wktExpected = Files.newBufferedReader(Paths.get(expectedDir + "/all.wkt"));
+    BufferedReader wktActual = Files.newBufferedReader(Paths.get(wktFile));
+    assertEquals(wktExpected.readLine(), wktActual.readLine());
+  }
 }

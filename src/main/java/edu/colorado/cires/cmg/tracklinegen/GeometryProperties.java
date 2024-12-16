@@ -89,7 +89,12 @@ public class GeometryProperties {
     }
 
     public Builder withAvgSpeedMPS(Double avgSpeedMPS) {
-      this.avgSpeedMPS = avgSpeedMPS;
+      if (avgSpeedMPS.isNaN()) {
+        avgSpeedMPS = null;
+      }
+      else {
+        this.avgSpeedMPS = avgSpeedMPS;
+      }
       return this;
     }
 
