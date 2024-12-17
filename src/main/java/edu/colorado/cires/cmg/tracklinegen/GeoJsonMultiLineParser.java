@@ -39,7 +39,7 @@ public class GeoJsonMultiLineParser {
   private boolean crossedAntimeridian = false;
   private double distanceM = 0;
   private long count = 0;
-  private double avgSpeedM = 0;
+  private Double avgSpeedM = 0.0;
   private GeometryProperties properties = null;
   private ArrayList<Double> bbox = null;
   private Coordinate lastCoordinate = null;
@@ -125,9 +125,18 @@ public class GeoJsonMultiLineParser {
       properties = GeometryProperties.Builder.configure().build();
     }
 
-    GeometryProperties.Builder propertiesBuilder = GeometryProperties.Builder.configure(properties)
-        .withDistanceM(distanceM)
-        .withAvgSpeedMPS(avgSpeedM);
+    GeometryProperties.Builder propertiesBuilder;
+
+    if (avgSpeedM.isNaN()) {
+      propertiesBuilder = GeometryProperties.Builder.configure(properties)
+              .withDistanceM(distanceM);
+    }
+    else {
+      propertiesBuilder = GeometryProperties.Builder.configure(properties)
+              .withDistanceM(distanceM)
+              .withAvgSpeedMPS(avgSpeedM);
+    }
+
 
     if (additionalProperties != null) {
       for (Entry<String, Object> entry : additionalProperties.entrySet()) {
