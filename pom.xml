@@ -46,16 +46,14 @@
     <maven.compiler.release>8</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <javadoc.version>3.3.1</javadoc.version>
-    <jacoco.version>0.8.7</jacoco.version>
-    <sign.serverId>gpg-sign</sign.serverId>
+    <javadoc.version>3.11.2</javadoc.version>
+    <jacoco.version>0.8.12</jacoco.version>
     <jts.version>1.19.0</jts.version>
     <geotools.version>32.0</geotools.version>
     <jackson.version>2.18.0</jackson.version>
     <commons-pool2.version>2.11.1</commons-pool2.version>
     <commons-text.version>1.12.0</commons-text.version>
     <slf4j.version>1.7.36</slf4j.version>
-    <javadoc.version>3.3.1</javadoc.version>
     <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
     <git.username />
     <git.password />
@@ -181,17 +179,23 @@
       <plugins>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-surefire-plugin</artifactId>
-          <version>2.22.2</version>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.13.0</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>3.5.2</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-antrun-plugin</artifactId>
-          <version>3.0.0</version>
+          <version>3.1.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-release-plugin</artifactId>
-          <version>3.0.0-M4</version>
+          <version>3.1.1</version>
         </plugin>
         <plugin>
           <groupId>pl.project13.maven</groupId>
@@ -206,32 +210,84 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-source-plugin</artifactId>
-          <version>3.2.1</version>
+          <version>3.3.1</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.9.1</version>
+          <version>3.21.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-project-info-reports-plugin</artifactId>
-          <version>3.1.2</version>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.10.1</version>
+          <version>3.8.0</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>${javadoc.version}</version>
         </plugin>
+        <plugin>
+          <groupId>org.owasp</groupId>
+          <artifactId>dependency-check-maven</artifactId>
+          <version>10.0.3</version>
+        </plugin>
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>4.8.6.5</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.simplify4u.plugins</groupId>
+          <artifactId>sign-maven-plugin</artifactId>
+          <version>1.1.0</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
     <plugins>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.simplify4u.plugins</groupId>
+        <artifactId>sign-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
 
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
@@ -282,7 +338,6 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.2.2</version>
         <executions>
           <execution>
             <goals>
