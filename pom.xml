@@ -28,8 +28,8 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:CI-CMG/trackline-simplifier.git</connection>
-    <developerConnection>scm:git:git@github.com:CI-CMG/trackline-simplifier.git</developerConnection>
+    <connection>scm:git:https://github.com/CI-CMG/trackline-simplifier.git</connection>
+    <developerConnection>scm:git:https://github.com/CI-CMG/trackline-simplifier.git</developerConnection>
     <url>https://github.com/CI-CMG/trackline-simplifier</url>
     <tag>HEAD</tag>
   </scm>
@@ -56,6 +56,9 @@
     <commons-text.version>1.12.0</commons-text.version>
     <slf4j.version>1.7.36</slf4j.version>
     <javadoc.version>3.3.1</javadoc.version>
+    <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+    <git.username />
+    <git.password />
   </properties>
 
   <reporting>
@@ -233,7 +236,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.8</version>
+        <version>1.7.0</version>
         <extensions>true</extensions>
         <configuration>
           <serverId>ossrh</serverId>
@@ -251,7 +254,9 @@
           <releaseProfiles>release,site-publish</releaseProfiles>
           <goals>deploy site</goals>
           <tagNameFormat>v@{project.version}</tagNameFormat>
-          <arguments>-D${sign.serverId}</arguments>
+          <arguments>-Dgit.username=${git.username} -Dgit.password=${git.password}</arguments>
+          <username>${git.username}</username>
+          <password>${git.password}</password>
         </configuration>
       </plugin>
 
@@ -285,12 +290,14 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
       </plugin>
     </plugins>
   </build>
 
   <profiles>
-
     <profile>
       <id>dep-check</id>
       <build>
@@ -298,9 +305,8 @@
           <plugin>
             <groupId>org.owasp</groupId>
             <artifactId>dependency-check-maven</artifactId>
-            <version>6.5.0</version>
             <configuration>
-              <failBuildOnAnyVulnerability>true</failBuildOnAnyVulnerability>
+              <failBuildOnCVSS>0</failBuildOnCVSS>
               <suppressionFiles>
                 <suppressionFile>owasp-dep-check-suppression.xml</suppressionFile>
               </suppressionFiles>
@@ -319,6 +325,9 @@
 
     <profile>
       <id>release</id>
+      <properties>
+        <sign.skipNoKey>false</sign.skipNoKey>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -348,49 +357,10 @@
               </replacementProperties>
             </configuration>
           </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>3.2.1</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.simplify4u.plugins</groupId>
-            <artifactId>sign-maven-plugin</artifactId>
-            <version>1.0.0</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-                <configuration>
-                  <skipNoKey>false</skipNoKey>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
         </plugins>
       </build>
     </profile>
+
 
     <profile>
       <id>site-publish</id>
@@ -402,7 +372,6 @@
           </plugin>
           <plugin>
             <artifactId>maven-resources-plugin</artifactId>
-            <version>3.1.0</version>
             <executions>
               <execution>
                 <id>index.html</id>
@@ -437,47 +406,47 @@
                 </goals>
                 <configuration>
                   <target>
-                    <delete dir="${project.build.directory}/project-documentation" quiet="true" />
+                    <delete dir="${project.build.directory}/project-documentation" quiet="true"/>
                     <exec dir="${project.build.directory}" executable="git">
                       <arg value="clone" />
                       <arg value="--depth=1" />
-                      <arg value="git@github.com:CI-CMG/project-documentation.git" />
+                      <arg value="https://${git.username}:${git.password}@github.com/CI-CMG/project-documentation.git" />
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
                       <arg value="remote" />
                       <arg value="add" />
                       <arg value="javadoc" />
-                      <arg value="git@github.com:CI-CMG/project-documentation.git" />
+                      <arg value="https://${git.username}:${git.password}@github.com/CI-CMG/project-documentation.git" />
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git" failonerror="false">
-                      <arg value="rm" />
-                      <arg value="-r" />
-                      <arg value="${git.remote.origin.url.suffix}/${project.version}" />
+                      <arg value="rm"/>
+                      <arg value="-r"/>
+                      <arg value="${git.remote.origin.url.suffix}/${project.version}"/>
                     </exec>
-                    <mkdir dir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}" />
+                    <mkdir dir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}"/>
                     <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}">
-                      <fileset file="${project.build.directory}/site-resources/index.html" />
+                      <fileset file="${project.build.directory}/site-resources/index.html"/>
                     </copy>
                     <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}/${project.version}">
-                      <fileset dir="${project.build.directory}/site" />
+                      <fileset dir="${project.build.directory}/site"/>
                     </copy>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="add" />
-                      <arg value="${git.remote.origin.url.suffix}/index.html" />
+                      <arg value="add"/>
+                      <arg value="${git.remote.origin.url.suffix}/index.html"/>
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="add" />
-                      <arg value="${git.remote.origin.url.suffix}/${project.version}" />
+                      <arg value="add"/>
+                      <arg value="${git.remote.origin.url.suffix}/${project.version}"/>
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="commit" />
-                      <arg value="-m" />
-                      <arg value="Update Documentation: ${git.remote.origin.url.suffix}/${project.version}" />
+                      <arg value="commit"/>
+                      <arg value="-m"/>
+                      <arg value="Update Documentation: ${git.remote.origin.url.suffix}/${project.version}"/>
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="push" />
-                      <arg value="javadoc" />
-                      <arg value="trunk" />
+                      <arg value="push"/>
+                      <arg value="javadoc"/>
+                      <arg value="trunk"/>
                     </exec>
                   </target>
                 </configuration>
@@ -487,6 +456,7 @@
         </plugins>
       </build>
     </profile>
+
   </profiles>
 
 </project>
