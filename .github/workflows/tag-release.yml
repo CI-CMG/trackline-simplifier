@@ -1,0 +1,35 @@
+name: maven tag release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+      - name: set up git
+        run: git config --global user.email bloop@bloop.org && git config --global user.name 'Bloopy McBloopFace'
+      - name: build with maven
+        run: |
+          mvn -B -s settings.xml \
+          build-helper:parse-version \
+          -Dgit.password=${{ secrets.RELEASE_PAT }} \
+          -Dgit.username=${{ secrets.RELEASE_USERNAME }} \
+          -Dresume=false -Dtag='v${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' \
+          -DreleaseVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}' \
+          -DdevelopmentVersion='${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.nextIncrementalVersion}-SNAPSHOT' \
+          release:prepare release:perform
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
+          SIGN_KEY_PASS: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          SIGN_KEY: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
