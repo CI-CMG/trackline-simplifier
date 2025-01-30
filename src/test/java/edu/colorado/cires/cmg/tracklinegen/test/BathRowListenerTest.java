@@ -33,7 +33,7 @@ public class BathRowListenerTest {
   public void testEmpty() throws Exception {
     List<GeoDataRow> rows = Collections.emptyList();
 
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -41,7 +41,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -95,7 +95,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(0D).withLon(1.4).withTimestamp(start.plusSeconds(12)).build()
     );
 
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -103,7 +103,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -146,7 +146,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(0D).withLon(0.9).withTimestamp(start.plusSeconds(4)).build()
     );
 
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -154,7 +154,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -209,7 +209,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(0D).withLon(10D).withBathyTime(1.0).withTimestamp(start.plusSeconds(10)).build()
     );
 
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 6;
 
@@ -217,7 +217,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -285,7 +285,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(0D).withLon(15D).withBathyTime(1.0).withTimestamp(start.plusSeconds(15)).build()
 
     );
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 3;
 
@@ -293,7 +293,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -364,7 +364,7 @@ public class BathRowListenerTest {
 
     );
 
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 3;
 
@@ -372,7 +372,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -434,7 +434,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(0D).withLon(12D).withBathyTime(1.0).withTimestamp(start.plusSeconds(12)).build()
 
     );
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 3;
 
@@ -442,7 +442,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -502,7 +502,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(0D).withLon(11D).withBathyTime(1.0).withTimestamp(start.plusSeconds(11)).build()
 
     );
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 3;
 
@@ -510,7 +510,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -549,7 +549,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(1D).withLon(2D).withBathyTime(1.0).withTimestamp(start.plusSeconds(2)).build()
     );
 
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 10;
     final int batchSize = 100;
 
@@ -557,7 +557,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -611,7 +611,7 @@ public class BathRowListenerTest {
 //        DataRow.Builder.configure().withLat(0D).withLon(1.4).withBathyQualityCode(6).withTimestamp(start.plusSeconds(12)).build()
     );
 
-    final long distanceSplit = 2000L;
+    final long NmSplit = 2000L;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -619,7 +619,7 @@ public class BathRowListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,

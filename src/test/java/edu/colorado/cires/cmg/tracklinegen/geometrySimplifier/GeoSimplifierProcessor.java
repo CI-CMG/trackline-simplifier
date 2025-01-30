@@ -13,7 +13,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 
 public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierContext, DataRow, GsBaseRowListener> {
   private int geoJsonPrecision = 5;
-  private long distanceSplit;
+  private long NmSplit;
   private long msSplit;
   private GeometrySimplifier geometrySimplifier;
   private int simplifierBatchSize;
@@ -25,11 +25,11 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
   private final Predicate<GeoDataRow> rowFilter;
   private final double maxAllowedSpeedKnts;
 
-  public GeoSimplifierProcessor(int geoJsonPrecision, long distanceSplit, long msSplit, GeometrySimplifier geometrySimplifier, int simplifierBatchSize,
+  public GeoSimplifierProcessor(int geoJsonPrecision, long NmSplit, long msSplit, GeometrySimplifier geometrySimplifier, int simplifierBatchSize,
       Path fnvFile, ObjectMapper objectMapper, Path gsf, long maxCount, GeometryFactory geometryFactory,
       Predicate<GeoDataRow> rowFilter, double maxAllowedSpeedKnts) {
     this.geoJsonPrecision = geoJsonPrecision;
-    this.distanceSplit = distanceSplit;
+    this.NmSplit = NmSplit;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
     this.simplifierBatchSize = simplifierBatchSize;
@@ -50,7 +50,7 @@ public class GeoSimplifierProcessor extends TracklineProcessor<GeoSimplifierCont
   @Override
   protected List<GsBaseRowListener> createRowListeners(GeoSimplifierContext context) {
     return Collections.singletonList(new GsBaseRowListener(
-        distanceSplit,
+        NmSplit,
         msSplit,
         geometrySimplifier,
         context.getLineWriter(),

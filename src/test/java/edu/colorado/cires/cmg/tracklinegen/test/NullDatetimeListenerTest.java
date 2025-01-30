@@ -19,7 +19,6 @@ import org.locationtech.jts.geom.PrecisionModel;
 
 public class NullDatetimeListenerTest {
 
-  private final long distanceSplit = 20;
   private final int maxCount = 0;
   private final int geoJsonPrecision = 4;
   private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
@@ -37,6 +36,7 @@ public class NullDatetimeListenerTest {
         new GeoDataRow(null, -157.89187, 21.27442)
     );
 
+    final long NmSplit = 20;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -44,7 +44,7 @@ public class NullDatetimeListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -81,6 +81,7 @@ public class NullDatetimeListenerTest {
         new GeoDataRow(null, 167.52778, -15.26825)
         );
 
+    final long NmSplit = 20;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -88,7 +89,7 @@ public class NullDatetimeListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -123,6 +124,7 @@ public class NullDatetimeListenerTest {
         new GeoDataRow(null, -157.89187, 20.90442)
         );
 
+    final long NmSplit = 20;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -130,7 +132,7 @@ public class NullDatetimeListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,
@@ -165,6 +167,7 @@ public class NullDatetimeListenerTest {
         new GeoDataRow(null, -157.89187, 21.30076)
     );
 
+    final long NmSplit = 20;
     final long msSplit = 1000L * 2L;
     final int batchSize = 5000;
 
@@ -172,7 +175,7 @@ public class NullDatetimeListenerTest {
     try (JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(out)) {
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, geoJsonPrecision);
       GsBaseRowListener listener = new GsBaseRowListener(
-          distanceSplit,
+          NmSplit,
           msSplit,
           geometrySimplifier,
           lineWriter,

@@ -205,7 +205,7 @@ public class FnvSplittingTest {
 //    Instant timestamp = LocalDateTime.parse(tokens[0], DATE_FORMAT).toInstant(ZoneOffset.UTC);
       return new FnvDataRow(timestamp, Double.parseDouble(tokens[2]), Double.parseDouble(tokens[3]));
     };
-    private final long distanceSplit;
+    private final long NmSplit;
     private final long msSplit;
     private final GeometrySimplifier geometrySimplifier;
     private final int batchSize;
@@ -215,9 +215,9 @@ public class FnvSplittingTest {
     private final OutputStream out;
     private final GeometryFactory geometryFactory;
 
-    public FnvTracklineProcessor(long distanceSplit, long msSplit, GeometrySimplifier geometrySimplifier, int batchSize, List<Path> fnvFiles, int precision,
+    public FnvTracklineProcessor(long NmSplit, long msSplit, GeometrySimplifier geometrySimplifier, int batchSize, List<Path> fnvFiles, int precision,
         ObjectMapper objectMapper, OutputStream out, GeometryFactory geometryFactory) {
-      this.distanceSplit = distanceSplit;
+      this.NmSplit = NmSplit;
       this.msSplit = msSplit;
       this.geometrySimplifier = geometrySimplifier;
       this.batchSize = batchSize;
@@ -236,7 +236,7 @@ public class FnvSplittingTest {
     @Override
     protected List<FnvRowListener> createRowListeners(FnvTracklineContext context) {
       return Collections.singletonList(
-          new FnvRowListener(distanceSplit, msSplit, geometrySimplifier, context.getLineWriter(), batchSize, geometryFactory, precision, maxAllowedSpeedKnts));
+          new FnvRowListener(NmSplit, msSplit, geometrySimplifier, context.getLineWriter(), batchSize, geometryFactory, precision, maxAllowedSpeedKnts));
     }
 
     @Override
@@ -286,9 +286,9 @@ public class FnvSplittingTest {
 
   private static class FnvRowListener extends BaseRowListener<FnvDataRow> {
 
-    public FnvRowListener(long distanceSplit, long msSplit, GeometrySimplifier geometrySimplifier, GeoJsonMultiLineWriter lineWriter, int batchSize,
+    public FnvRowListener(long NmSplit, long msSplit, GeometrySimplifier geometrySimplifier, GeoJsonMultiLineWriter lineWriter, int batchSize,
         GeometryFactory geometryFactory, int precision, double maxAllowedSpeedKnts) {
-      super(distanceSplit, msSplit, geometrySimplifier, lineWriter, batchSize, x -> true, 0, geometryFactory, precision, maxAllowedSpeedKnts);
+      super(NmSplit, msSplit, geometrySimplifier, lineWriter, batchSize, x -> true, 0, geometryFactory, precision, maxAllowedSpeedKnts);
     }
   }
 

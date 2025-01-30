@@ -19,7 +19,7 @@ import org.locationtech.jts.geom.Point;
 
 public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
-  private final long distanceSplit;
+  private final long NmSplit;
   private final long msSplit;
   private final GeometrySimplifier geometrySimplifier;
   private final Predicate<T> filterRow;
@@ -41,7 +41,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   /**
    *
-   * @param distanceSplit
+   * @param NmSplit Nautical miles value by which to split trackline segments
    * @param msSplit
    * @param geometrySimplifier
    * @param lineWriter
@@ -55,7 +55,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
    */
   @Deprecated
   public BaseRowListener(
-      long distanceSplit,
+      long NmSplit,
       long msSplit,
       GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter,
@@ -65,11 +65,11 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       GeometryFactory geometryFactory,
       int geoJsonPrecision
   ) {
-    this(distanceSplit, msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
+    this(NmSplit, msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
   }
 
   public BaseRowListener(
-      long distanceSplit,
+      long NmSplit,
       long msSplit,
       GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter,
@@ -81,7 +81,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       double maxAllowedSpeedKnts
   ) {
 
-    this.distanceSplit = distanceSplit;
+    this.NmSplit = NmSplit;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
     this.lineWriter = lineWriter;
@@ -436,11 +436,11 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private boolean shouldSplit(PointState point1, PointState point2) {
     if (point2.isSimplified()) {
       return point2.getIndex() == 0;
-    } if (isSplittingByMsEnabled() || isSplittingByDistanceEnabled()) {
+    } if (isSplittingByMsEnabled() || isSplittingByNmEnabled()) {
       double difference = point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ();
       // Calculate distance between two points by retrieving distance in meters and converting to nautical miles
       double distance = (getDistance(point1.getPoint().getCoordinate(), point2.getPoint().getCoordinate()) / 1852);
-      return (difference > msSplit) || (distance > distanceSplit);
+      return (difference > msSplit) || (distance > NmSplit);
     }
 
     return false;
@@ -450,8 +450,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     return msSplit > 0;
   }
 
-  private boolean isSplittingByDistanceEnabled() {
-    return distanceSplit > 0;
+  private boolean isSplittingByNmEnabled() {
+    return NmSplit > 0;
   }
 
 
