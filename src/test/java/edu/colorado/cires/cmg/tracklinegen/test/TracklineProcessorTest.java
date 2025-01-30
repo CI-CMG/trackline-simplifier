@@ -27,7 +27,7 @@ public class TracklineProcessorTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 0;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -57,7 +57,7 @@ public class TracklineProcessorTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 0;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -87,7 +87,7 @@ public class TracklineProcessorTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 1;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);

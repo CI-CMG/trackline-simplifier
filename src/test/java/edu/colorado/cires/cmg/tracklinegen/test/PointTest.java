@@ -145,7 +145,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -190,7 +190,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -235,7 +235,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.00001;
     final int simplifierBatchSize = 3;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 10000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -278,7 +278,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
-      final int NmSplit = 20;
+      final int NmSplit = 0;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -321,7 +321,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.01;
-      final int NmSplit = 20;
+      final int NmSplit = 0;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -374,7 +374,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
-      final int NmSplit = 100000;
+      final int NmSplit = 0;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -415,7 +415,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
-      final int NmSplit = 20;
+      final int NmSplit = 0;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -456,7 +456,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
-      final int NmSplit = 100000;
+      final int NmSplit = 0;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -544,7 +544,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -589,7 +589,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -633,7 +633,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -677,7 +677,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
-    final int NmSplit = 20;
+    final int NmSplit = 0;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);

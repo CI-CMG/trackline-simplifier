@@ -436,13 +436,19 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private boolean shouldSplit(PointState point1, PointState point2) {
     if (point2.isSimplified()) {
       return point2.getIndex() == 0;
-    } if (isSplittingByMsEnabled() || isSplittingByNmEnabled()) {
+
+    }
+    if (isSplittingByMsEnabled()) {
       double difference = point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ();
+      if (difference > msSplit) {
+        return true;
+      }
+    }
+    if (isSplittingByNmEnabled()) {
       // Calculate distance between two points by retrieving distance in meters and converting to nautical miles
       double distance = (getDistance(point1.getPoint().getCoordinate(), point2.getPoint().getCoordinate()) / 1852);
-      return (difference > msSplit) || (distance > NmSplit);
+      return distance > NmSplit;
     }
-
     return false;
   }
 
