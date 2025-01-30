@@ -145,6 +145,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
+    final int distanceSplit = 20;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -159,7 +160,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
@@ -189,6 +190,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
+    final int distanceSplit = 20;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -203,7 +205,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
@@ -233,6 +235,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.00001;
     final int simplifierBatchSize = 3;
+    final int distanceSplit = 20;
     final int msSplit = 10000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -247,7 +250,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
@@ -275,6 +278,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
+      final int distanceSplit = 20;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -289,7 +293,7 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
           row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
@@ -317,6 +321,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.01;
+      final int distanceSplit = 20;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -331,7 +336,7 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
           row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
@@ -369,6 +374,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
+      final int distanceSplit = 100000;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -383,7 +389,7 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
           row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
@@ -409,6 +415,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
+      final int distanceSplit = 20;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -423,7 +430,7 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
           row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
@@ -449,6 +456,7 @@ public class PointTest {
     for (int simplifierBatchSize = 2; simplifierBatchSize <= 13; simplifierBatchSize++) {
       final int geoJsonPrecision = 5;
       final double simplificationTolerance = 0.000001;
+      final int distanceSplit = 100000;
       final int msSplit = 100000;
       final long maxCount = 10000;
       GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -463,7 +471,7 @@ public class PointTest {
       byte[] wktBytes = null;
 
       GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-          geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+          geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
           row -> true, maxAllowedSpeedKnts);
       phase1.process();
 
@@ -488,6 +496,7 @@ public class PointTest {
   @Test
   public void testLargeFileMultiPrecision() throws Exception {
 
+    final int distanceSplit = 0;
     final int msSplit = 0;
     final long maxCount = 10000;
     final long simplifierBatchSize = maxCount;
@@ -508,7 +517,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, (int) simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, (int) simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
@@ -535,6 +544,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
+    final int distanceSplit = 20;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -549,7 +559,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
@@ -579,6 +589,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
+    final int distanceSplit = 20;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -593,7 +604,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
@@ -622,6 +633,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
+    final int distanceSplit = 20;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -636,7 +648,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> true, maxAllowedSpeedKnts);
     phase1.process();
 
@@ -665,6 +677,7 @@ public class PointTest {
     final int geoJsonPrecision = 5;
     final double simplificationTolerance = 0.0001;
     final int simplifierBatchSize = 3000;
+    final int distanceSplit = 20;
     final int msSplit = 3600000;
     final long maxCount = 10000;
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(simplificationTolerance);
@@ -679,7 +692,7 @@ public class PointTest {
     byte[] wktBytes = null;
 
     GeoSimplifierProcessor phase1 = new GeoSimplifierProcessor(
-        geoJsonPrecision, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
+        geoJsonPrecision, distanceSplit, msSplit, geometrySimplifier, simplifierBatchSize, dataFile, objectMapper, gsf, maxCount, geometryFactory,
         row -> false, maxAllowedSpeedKnts);
     phase1.process();
 

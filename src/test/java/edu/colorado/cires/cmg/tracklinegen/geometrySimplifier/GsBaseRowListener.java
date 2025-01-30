@@ -8,10 +8,11 @@ import org.locationtech.jts.geom.GeometryFactory;
 
 public class GsBaseRowListener extends BaseRowListener<GeoDataRow> {
 
-  public GsBaseRowListener(long msSplit, GeometrySimplifier geometrySimplifier,
+  public GsBaseRowListener(long distanceSplit, long msSplit, GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter, int batchSize, long maxCount,
       GeometryFactory geometryFactory, int geoJsonPrecision, Predicate<GeoDataRow> rowFilter, double maxAllowedSpeedKnts) {
-    super(msSplit,
+    super(distanceSplit,
+        msSplit,
         geometrySimplifier,
         lineWriter,
         batchSize,

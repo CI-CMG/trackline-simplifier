@@ -5,7 +5,6 @@ import static edu.colorado.cires.cmg.tracklinegen.AntimeridianUtils.getSpeed;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +19,7 @@ import org.locationtech.jts.geom.Point;
 
 public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
+  private final long distanceSplit;
   private final long msSplit;
   private final GeometrySimplifier geometrySimplifier;
   private final Predicate<T> filterRow;
@@ -41,6 +41,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   /**
    *
+   * @param distanceSplit
    * @param msSplit
    * @param geometrySimplifier
    * @param lineWriter
@@ -49,11 +50,12 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
    * @param maxAllowedSimplifiedPoints
    * @param geometryFactory
    * @param geoJsonPrecision
-   * @deprecated Use {@link BaseRowListener#BaseRowListener(long, GeometrySimplifier, GeoJsonMultiLineWriter, int, Predicate, long, GeometryFactory, int, double)}
+   * @deprecated Use {@link BaseRowListener#BaseRowListener(long, long, GeometrySimplifier, GeoJsonMultiLineWriter, int, Predicate, long, GeometryFactory, int, double)}
    *
    */
   @Deprecated
   public BaseRowListener(
+      long distanceSplit,
       long msSplit,
       GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter,
@@ -63,10 +65,11 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       GeometryFactory geometryFactory,
       int geoJsonPrecision
   ) {
-    this(msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
+    this(distanceSplit, msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
   }
 
   public BaseRowListener(
+      long distanceSplit,
       long msSplit,
       GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter,
@@ -78,6 +81,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       double maxAllowedSpeedKnts
   ) {
 
+    this.distanceSplit = distanceSplit;
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
     this.lineWriter = lineWriter;
@@ -430,20 +434,26 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private boolean shouldSplit(PointState point1, PointState point2) {
-    if (!isSplittingEnabled()) {
-      return false;
-    }
     if (point2.isSimplified()) {
       return point2.getIndex() == 0;
-    } else {
+    } if (isSplittingByMsEnabled() || isSplittingByDistanceEnabled()) {
       double difference = point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ();
-      return difference > msSplit;
+      // Calculate distance between two points by retrieving distance in meters and converting to nautical miles
+      double distance = (getDistance(point1.getPoint().getCoordinate(), point2.getPoint().getCoordinate()) / 1852);
+      return (difference > msSplit) || (distance > distanceSplit);
     }
+
+    return false;
   }
 
-  private boolean isSplittingEnabled() {
+  private boolean isSplittingByMsEnabled() {
     return msSplit > 0;
   }
+
+  private boolean isSplittingByDistanceEnabled() {
+    return distanceSplit > 0;
+  }
+
 
   private void writeCoordinate(Coordinate coordinate) {
     List<Double> args = new ArrayList<>(4);
