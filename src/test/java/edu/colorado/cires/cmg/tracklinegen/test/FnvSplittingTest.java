@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.colorado.cires.cmg.iostream.Pipe;
 import edu.colorado.cires.cmg.tracklinegen.BaseRowListener;
+import edu.colorado.cires.cmg.tracklinegen.BaseRowListenerConfiguration;
 import edu.colorado.cires.cmg.tracklinegen.DataRow;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineProcessor;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineWriter;
@@ -286,9 +287,19 @@ public class FnvSplittingTest {
 
   private static class FnvRowListener extends BaseRowListener<FnvDataRow> {
 
-    public FnvRowListener(long NmSplit, long msSplit, GeometrySimplifier geometrySimplifier, GeoJsonMultiLineWriter lineWriter, int batchSize,
+    public FnvRowListener(long nmSplit, long msSplit, GeometrySimplifier geometrySimplifier, GeoJsonMultiLineWriter lineWriter, int batchSize,
         GeometryFactory geometryFactory, int precision, double maxAllowedSpeedKnts) {
-      super(NmSplit, msSplit, geometrySimplifier, lineWriter, batchSize, x -> true, 0, geometryFactory, precision, maxAllowedSpeedKnts);
+      super(BaseRowListenerConfiguration.<FnvDataRow>configure()
+          .withNmSplit(nmSplit)
+          .withMsSplit(msSplit)
+          .withGeometrySimplifier(geometrySimplifier)
+          .withLineWriter(lineWriter)
+          .withBatchSize(batchSize)
+          .withFilterRow(x -> true)
+          .withGeometryFactory(geometryFactory)
+          .withGeoJsonPrecision(precision)
+          .withMaxAllowedSpeedKnts(maxAllowedSpeedKnts)
+          .build());
     }
   }
 

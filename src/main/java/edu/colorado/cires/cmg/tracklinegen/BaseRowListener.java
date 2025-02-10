@@ -27,17 +27,15 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private final int batchSize;
   private final long maxAllowedSimplifiedPoints;
   private final double maxAllowedSpeedKnts;
-
-  private long unsimplifiedPointCount = 0;
-  private long simplifiedPointCount = 0;
-  private long targetPointCount = 0;
+  private long unsimplifiedPointCount;
+  private long simplifiedPointCount;
+  private long targetPointCount;
   private final GeometryFactory geometryFactory;
-  private boolean started = false;
-
-  private List<PointState> pointBuffer;
-
   private final double minDistance;
   private final DecimalFormat format;
+
+  private boolean started;
+  private List<PointState> pointBuffer;
 
   /**
    *
@@ -49,7 +47,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
    * @param maxAllowedSimplifiedPoints
    * @param geometryFactory
    * @param geoJsonPrecision
-   * @deprecated Use {@link BaseRowListener#BaseRowListener(long, long, GeometrySimplifier, GeoJsonMultiLineWriter, int, Predicate, long, GeometryFactory, int, double)}
+   * @deprecated Use {@link BaseRowListener#BaseRowListener(BaseRowListenerConfiguration)}
    *
    */
   @Deprecated
@@ -67,6 +65,9 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   @Deprecated
+  /**
+   * @deprecated Use {@link BaseRowListener#BaseRowListener(BaseRowListenerConfiguration)}
+   */
   public BaseRowListener(
       long msSplit,
       GeometrySimplifier geometrySimplifier,
@@ -78,26 +79,20 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       int geoJsonPrecision,
       double maxAllowedSpeedKnts
   ) {
-    this(BaseRowListenerConfiguration<T>)
-    this.msSplit = msSplit;
-    this.geometrySimplifier = geometrySimplifier;
-    this.lineWriter = lineWriter;
-    this.filterRow = filterRow;
-    this.batchSize = batchSize;
-    this.maxAllowedSimplifiedPoints = maxAllowedSimplifiedPoints;
-    this.geometryFactory = geometryFactory;
-    this.minDistance = 1d / Math.pow(10d, geoJsonPrecision);
-    StringBuilder sb = new StringBuilder("0.");
-    for (int i = 1; i <= geoJsonPrecision; i++) {
-      sb.append("#");
-    }
-    format = new DecimalFormat(sb.toString(), DecimalFormatSymbols.getInstance(Locale.ENGLISH));
-    this.maxAllowedSpeedKnts = maxAllowedSpeedKnts;
+    this(BaseRowListenerConfiguration.<T>configure()
+        .withMsSplit(msSplit)
+        .withGeometrySimplifier(geometrySimplifier)
+        .withLineWriter(lineWriter)
+        .withBatchSize(batchSize)
+        .withFilterRow(filterRow)
+        .withMaxAllowedSimplifiedPoints(maxAllowedSimplifiedPoints)
+        .withGeometryFactory(geometryFactory)
+        .withGeoJsonPrecision(geoJsonPrecision)
+        .withMaxAllowedSpeedKnts(maxAllowedSpeedKnts)
+        .build());
   }
 
-  public BaseRowListener(
-      BaseRowListenerConfiguration<T> config  )
-  {
+  public BaseRowListener(BaseRowListenerConfiguration<T> config) {
     this.nmSplit = config.getNmSplit();
     this.msSplit = config.getMsSplit();
     this.geometrySimplifier = config.getGeometrySimplifier();
@@ -464,7 +459,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     if (isSplittingByNmEnabled()) {
       // Calculate distance between two points by retrieving distance in meters and converting to nautical miles
       double distance = (getDistance(point1.getPoint().getCoordinate(), point2.getPoint().getCoordinate()) / 1852);
-      return distance > NmSplit;
+      return distance > nmSplit;
     }
     return false;
   }
@@ -474,7 +469,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private boolean isSplittingByNmEnabled() {
-    return NmSplit > 0;
+    return nmSplit > 0;
   }
 
 

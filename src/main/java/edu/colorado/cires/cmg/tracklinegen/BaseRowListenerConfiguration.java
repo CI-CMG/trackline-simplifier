@@ -1,12 +1,9 @@
 package edu.colorado.cires.cmg.tracklinegen;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
 import java.util.function.Predicate;
 import org.locationtech.jts.geom.GeometryFactory;
 
-public class BaseRowListenerConfiguration<T> {
+public class BaseRowListenerConfiguration<T extends DataRow> {
 
   private final long nmSplit;
   private final long msSplit;
@@ -34,11 +31,11 @@ public class BaseRowListenerConfiguration<T> {
 
   }
 
-  public Long getNmSplit() {
+  public long getNmSplit() {
     return nmSplit;
   }
 
-  public Long getMsSplit() {
+  public long getMsSplit() {
     return msSplit;
   }
 
@@ -54,15 +51,15 @@ public class BaseRowListenerConfiguration<T> {
     return lineWriter;
   }
 
-  public Integer getBatchSize() {
+  public int getBatchSize() {
     return batchSize;
   }
 
-  public Long getMaxAllowedSimplifiedPoints() {
+  public long getMaxAllowedSimplifiedPoints() {
     return maxAllowedSimplifiedPoints;
   }
 
-  public Double getMaxAllowedSpeedKnts() {
+  public double getMaxAllowedSpeedKnts() {
     return maxAllowedSpeedKnts;
   }
 
@@ -70,36 +67,32 @@ public class BaseRowListenerConfiguration<T> {
     return geometryFactory;
   }
 
-  public Integer getGeoJsonPrecision() {
+  public int getGeoJsonPrecision() {
     return geoJsonPrecision;
   }
 
-  public static<T> Builder<T> configure() {
+  public static <T extends DataRow> Builder<T> configure() {
     return new Builder<>();
   }
 
-  public static<T> Builder<T> configure(
-      BaseRowListenerConfiguration<T> properties) {
+  public static <T extends DataRow> Builder<T> configure(BaseRowListenerConfiguration<T> properties) {
     return new Builder<>(properties);
   }
 
-  public static class Builder<T> {
+  public static class Builder<T extends DataRow> {
 
-    private Long nmSplit;
-    private Long msSplit;
+    private long nmSplit;
+    private long msSplit;
     private GeometrySimplifier geometrySimplifier;
     private Predicate<T> filterRow;
     private GeoJsonMultiLineWriter lineWriter;
-    private Integer batchSize;
-    private Long maxAllowedSimplifiedPoints;
-    private Double maxAllowedSpeedKnts;
+    private int batchSize;
+    private long maxAllowedSimplifiedPoints;
+    private double maxAllowedSpeedKnts;
     private GeometryFactory geometryFactory;
-    private Double minDistance;
-    private DecimalFormat format;
-    private Integer geoJsonPrecision;
+    private int geoJsonPrecision;
 
-
-    public Builder() {
+    private Builder() {
 
     }
 
