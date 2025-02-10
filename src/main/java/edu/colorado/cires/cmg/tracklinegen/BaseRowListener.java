@@ -19,7 +19,7 @@ import org.locationtech.jts.geom.Point;
 
 public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
-  private final long NmSplit;
+  private final long nmSplit;
   private final long msSplit;
   private final GeometrySimplifier geometrySimplifier;
   private final Predicate<T> filterRow;
@@ -41,7 +41,6 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   /**
    *
-   * @param NmSplit Nautical miles value by which to split trackline segments
    * @param msSplit
    * @param geometrySimplifier
    * @param lineWriter
@@ -55,7 +54,6 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
    */
   @Deprecated
   public BaseRowListener(
-      long NmSplit,
       long msSplit,
       GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter,
@@ -65,11 +63,11 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       GeometryFactory geometryFactory,
       int geoJsonPrecision
   ) {
-    this(NmSplit, msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
+    this(msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
   }
 
+  @Deprecated
   public BaseRowListener(
-      long NmSplit,
       long msSplit,
       GeometrySimplifier geometrySimplifier,
       GeoJsonMultiLineWriter lineWriter,
@@ -80,8 +78,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       int geoJsonPrecision,
       double maxAllowedSpeedKnts
   ) {
-
-    this.NmSplit = NmSplit;
+    this(BaseRowListenerConfiguration<T>)
     this.msSplit = msSplit;
     this.geometrySimplifier = geometrySimplifier;
     this.lineWriter = lineWriter;
@@ -96,6 +93,26 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     }
     format = new DecimalFormat(sb.toString(), DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     this.maxAllowedSpeedKnts = maxAllowedSpeedKnts;
+  }
+
+  public BaseRowListener(
+      BaseRowListenerConfiguration<T> config  )
+  {
+    this.nmSplit = config.getNmSplit();
+    this.msSplit = config.getMsSplit();
+    this.geometrySimplifier = config.getGeometrySimplifier();
+    this.lineWriter = config.getLineWriter();
+    this.filterRow = config.getFilterRow();
+    this.batchSize = config.getBatchSize();
+    this.maxAllowedSimplifiedPoints = config.getMaxAllowedSimplifiedPoints();
+    this.geometryFactory = config.getGeometryFactory();
+    this.minDistance = 1d / Math.pow(10d, config.getGeoJsonPrecision());
+    StringBuilder sb = new StringBuilder("0.");
+    for (int i = 1; i <= config.getGeoJsonPrecision(); i++) {
+      sb.append("#");
+    }
+    format = new DecimalFormat(sb.toString(), DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+    this.maxAllowedSpeedKnts = config.getMaxAllowedSpeedKnts();
   }
 
   @Override
