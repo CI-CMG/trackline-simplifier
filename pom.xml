@@ -31,7 +31,7 @@
     <connection>scm:git:https://github.com/CI-CMG/trackline-simplifier.git</connection>
     <developerConnection>scm:git:https://github.com/CI-CMG/trackline-simplifier.git</developerConnection>
     <url>https://github.com/CI-CMG/trackline-simplifier</url>
-    <tag>HEAD</tag>
+    <tag>2.3</tag>
   </scm>
 
   <distributionManagement>
@@ -461,7 +461,7 @@
                 </goals>
                 <configuration>
                   <target>
-                    <delete dir="${project.build.directory}/project-documentation" quiet="true"/>
+                    <delete dir="${project.build.directory}/project-documentation" quiet="true" />
                     <exec dir="${project.build.directory}" executable="git">
                       <arg value="clone" />
                       <arg value="--depth=1" />
@@ -474,34 +474,34 @@
                       <arg value="https://${git.username}:${git.password}@github.com/CI-CMG/project-documentation.git" />
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git" failonerror="false">
-                      <arg value="rm"/>
-                      <arg value="-r"/>
-                      <arg value="${git.remote.origin.url.suffix}/${project.version}"/>
+                      <arg value="rm" />
+                      <arg value="-r" />
+                      <arg value="${git.remote.origin.url.suffix}/${project.version}" />
                     </exec>
-                    <mkdir dir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}"/>
+                    <mkdir dir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}" />
                     <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}">
-                      <fileset file="${project.build.directory}/site-resources/index.html"/>
+                      <fileset file="${project.build.directory}/site-resources/index.html" />
                     </copy>
                     <copy todir="${project.build.directory}/project-documentation/${git.remote.origin.url.suffix}/${project.version}">
-                      <fileset dir="${project.build.directory}/site"/>
+                      <fileset dir="${project.build.directory}/site" />
                     </copy>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="add"/>
-                      <arg value="${git.remote.origin.url.suffix}/index.html"/>
+                      <arg value="add" />
+                      <arg value="${git.remote.origin.url.suffix}/index.html" />
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="add"/>
-                      <arg value="${git.remote.origin.url.suffix}/${project.version}"/>
+                      <arg value="add" />
+                      <arg value="${git.remote.origin.url.suffix}/${project.version}" />
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="commit"/>
-                      <arg value="-m"/>
-                      <arg value="Update Documentation: ${git.remote.origin.url.suffix}/${project.version}"/>
+                      <arg value="commit" />
+                      <arg value="-m" />
+                      <arg value="Update Documentation: ${git.remote.origin.url.suffix}/${project.version}" />
                     </exec>
                     <exec dir="${project.build.directory}/project-documentation" executable="git">
-                      <arg value="push"/>
-                      <arg value="javadoc"/>
-                      <arg value="trunk"/>
+                      <arg value="push" />
+                      <arg value="javadoc" />
+                      <arg value="trunk" />
                     </exec>
                   </target>
                 </configuration>
