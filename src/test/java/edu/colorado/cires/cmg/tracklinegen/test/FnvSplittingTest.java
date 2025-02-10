@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.colorado.cires.cmg.iostream.Pipe;
 import edu.colorado.cires.cmg.tracklinegen.BaseRowListener;
+import edu.colorado.cires.cmg.tracklinegen.BaseRowListenerConfiguration;
 import edu.colorado.cires.cmg.tracklinegen.DataRow;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineProcessor;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineWriter;
@@ -205,7 +206,7 @@ public class FnvSplittingTest {
 //    Instant timestamp = LocalDateTime.parse(tokens[0], DATE_FORMAT).toInstant(ZoneOffset.UTC);
       return new FnvDataRow(timestamp, Double.parseDouble(tokens[2]), Double.parseDouble(tokens[3]));
     };
-
+    private final long NmSplit;
     private final long msSplit;
     private final GeometrySimplifier geometrySimplifier;
     private final int batchSize;
@@ -215,8 +216,9 @@ public class FnvSplittingTest {
     private final OutputStream out;
     private final GeometryFactory geometryFactory;
 
-    public FnvTracklineProcessor(long msSplit, GeometrySimplifier geometrySimplifier, int batchSize, List<Path> fnvFiles, int precision,
+    public FnvTracklineProcessor(long NmSplit, long msSplit, GeometrySimplifier geometrySimplifier, int batchSize, List<Path> fnvFiles, int precision,
         ObjectMapper objectMapper, OutputStream out, GeometryFactory geometryFactory) {
+      this.NmSplit = NmSplit;
       this.msSplit = msSplit;
       this.geometrySimplifier = geometrySimplifier;
       this.batchSize = batchSize;
@@ -235,7 +237,7 @@ public class FnvSplittingTest {
     @Override
     protected List<FnvRowListener> createRowListeners(FnvTracklineContext context) {
       return Collections.singletonList(
-          new FnvRowListener(msSplit, geometrySimplifier, context.getLineWriter(), batchSize, geometryFactory, precision, maxAllowedSpeedKnts));
+          new FnvRowListener(NmSplit, msSplit, geometrySimplifier, context.getLineWriter(), batchSize, geometryFactory, precision, maxAllowedSpeedKnts));
     }
 
     @Override
@@ -285,14 +287,25 @@ public class FnvSplittingTest {
 
   private static class FnvRowListener extends BaseRowListener<FnvDataRow> {
 
-    public FnvRowListener(long msSplit, GeometrySimplifier geometrySimplifier, GeoJsonMultiLineWriter lineWriter, int batchSize,
+    public FnvRowListener(long nmSplit, long msSplit, GeometrySimplifier geometrySimplifier, GeoJsonMultiLineWriter lineWriter, int batchSize,
         GeometryFactory geometryFactory, int precision, double maxAllowedSpeedKnts) {
-      super(msSplit, geometrySimplifier, lineWriter, batchSize, x -> true, 0, geometryFactory, precision, maxAllowedSpeedKnts);
+      super(BaseRowListenerConfiguration.<FnvDataRow>configure()
+          .withNmSplit(nmSplit)
+          .withMsSplit(msSplit)
+          .withGeometrySimplifier(geometrySimplifier)
+          .withLineWriter(lineWriter)
+          .withBatchSize(batchSize)
+          .withFilterRow(x -> true)
+          .withGeometryFactory(geometryFactory)
+          .withGeoJsonPrecision(precision)
+          .withMaxAllowedSpeedKnts(maxAllowedSpeedKnts)
+          .build());
     }
   }
 
   private static final int SRID = 8307;
   private static final double simplificationTolerance = 0.0001;
+  private static final long splitDistance = 900000L;
   private static final long splitGeometryMs = 900000L;
   private static final int batchSize = 10000;
   private static final int geoJsonPrecision = 5;
@@ -316,7 +329,7 @@ public class FnvSplittingTest {
     Files.createDirectories(wktPath.getParent());
 
     Pipe.pipe((out) -> {
-      FnvTracklineProcessor phase1 = new FnvTracklineProcessor(splitGeometryMs, new GeometrySimplifier(simplificationTolerance), batchSize, fnvFiles,
+      FnvTracklineProcessor phase1 = new FnvTracklineProcessor(splitDistance, splitGeometryMs, new GeometrySimplifier(simplificationTolerance), batchSize, fnvFiles,
           geoJsonPrecision, objectMapper, out, geometryFactory);
       try {
         phase1.process();

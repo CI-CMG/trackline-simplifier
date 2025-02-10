@@ -1,0 +1,18 @@
+{"type":"Feature","geometry":{"type":"MultiLineString",
+  "coordinates":[
+    [
+      [-157.8803,21.3137],
+      [-157.8904,21.3008]
+    ],[
+      [-157.8919,20.9144],
+      [-157.8919,20.9044]
+    ]
+  ]},
+  "properties": {
+    "distanceM":null,
+    "avgSpeedMPS":null,
+    "unsimplifiedPointCount": 4,
+    "simplifiedPointCount": 4,
+    "targetPointCount": 4
+  }
+}
