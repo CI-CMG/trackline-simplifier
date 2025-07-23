@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
+import org.jetbrains.annotations.Nullable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.CoordinateXYZM;
 import org.locationtech.jts.geom.Envelope;
@@ -33,6 +35,7 @@ public class GeoJsonMultiLineParser {
   private final GeometryFactory geometryFactory = GeometryFactoryFactory.create();
   private final DecimalFormat format;
   private final double maxAllowedSpeedKnts;
+  private final boolean allowDuplicateTimestamps;
 
   private Envelope westBoundingBox = new Envelope();
   private Envelope eastBoundingBox = new Envelope();
@@ -44,8 +47,10 @@ public class GeoJsonMultiLineParser {
   private ArrayList<Double> bbox = null;
   private Coordinate lastCoordinate = null;
 
-  public GeoJsonMultiLineParser(ObjectMapper objectMapper, int precision, double maxAllowedSpeedKnts) {
+  public GeoJsonMultiLineParser(ObjectMapper objectMapper, int precision, double maxAllowedSpeedKnts,
+    boolean allowDuplicateTimestamps) {
     this.objectMapper = objectMapper;
+    this.allowDuplicateTimestamps = allowDuplicateTimestamps;
     StringBuilder sb = new StringBuilder("0.");
     for (int i = 1; i <= precision; i++) {
       sb.append("#");
@@ -54,6 +59,9 @@ public class GeoJsonMultiLineParser {
     this.maxAllowedSpeedKnts = maxAllowedSpeedKnts;
   }
 
+  public GeoJsonMultiLineParser(ObjectMapper objectMapper, int precision, double maxAllowedSpeedKnts) {
+    this(objectMapper, precision, maxAllowedSpeedKnts, false);
+  }
 
   private void copyInternal(JsonParser jsonParser, JsonGenerator jsonGenerator) throws IOException {
     switch (jsonParser.getCurrentToken()) {
@@ -235,10 +243,13 @@ public class GeoJsonMultiLineParser {
     jsonGenerator.writeEndArray();
   }
 
-  private void updateStats(double m, double v) {
+  private void updateStats(double m, @Nullable Double v) {
     distanceM += m;
+    if (allowDuplicateTimestamps && v == null) {
+      return;
+    }
     count++;
-    avgSpeedM = avgSpeedM + (v - avgSpeedM) / count;
+    avgSpeedM = avgSpeedM + (Objects.requireNonNull(v, "v must not be null") - avgSpeedM) / count;
   }
 
   private void processBoundingBox(Coordinate coordinate) {
@@ -296,6 +307,7 @@ public class GeoJsonMultiLineParser {
   private void processCoordinate(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter) throws IOException, ValidationException {
     List<Double> coordArray = objectMapper.readValue(jsonParser, LIST_DOUBLE);
     Coordinate coordinate = arrayToCoordinate(coordArray);
+    boolean updateLastCoordinate = true;
     if (lastCoordinate == null) {
       writeArray(jsonGenerator, wktWriter, coordinate);
     } else {
@@ -306,7 +318,10 @@ public class GeoJsonMultiLineParser {
         wktWriter.write(","); //coordinate separator
         writeArray(jsonGenerator, wktWriter, coordinate);
         double m = getDistance(lastCoordinate, coordinate);
-        double v = getSpeed(maxAllowedSpeedKnts, lastCoordinate, coordinate, m);
+        Double v = getSpeed(maxAllowedSpeedKnts, lastCoordinate, coordinate, m, allowDuplicateTimestamps);
+        if (v == null) {
+          updateLastCoordinate = false;
+        }
         updateStats(m, v);
       } else if(split.size() == 3) {
         coordinate = split.get(0);
@@ -318,7 +333,10 @@ public class GeoJsonMultiLineParser {
         wktWriter.write(","); //coordinate separator
         writeArray(jsonGenerator, wktWriter, coordinate);
         double m = getDistance(split.get(2), coordinate);
-        double v = getSpeed(maxAllowedSpeedKnts, lastCoordinate, coordinate, m);
+        Double v = getSpeed(maxAllowedSpeedKnts, lastCoordinate, coordinate, m, allowDuplicateTimestamps);
+        if (v == null) {
+          updateLastCoordinate = false;
+        }
         updateStats(m, v);
       } else if(split.size() == 4) {
         coordinate = split.get(3);
@@ -332,12 +350,17 @@ public class GeoJsonMultiLineParser {
         wktWriter.write(",");
         writeArray(jsonGenerator, wktWriter, coordinate);
         double m = getDistance(lastCoordinate, split.get(1)) + getDistance(split.get(2), split.get(3));
-        double v = getSpeed(maxAllowedSpeedKnts, lastCoordinate, split.get(3), m);
+        Double v = getSpeed(maxAllowedSpeedKnts, lastCoordinate, split.get(3), m, allowDuplicateTimestamps);
+        if (v == null) {
+          updateLastCoordinate = false;
+        }
         updateStats(m, v);
       }
     }
     processBoundingBox(coordinate);
-    lastCoordinate = coordinate;
+    if (updateLastCoordinate) {
+      lastCoordinate = coordinate;
+    }
   }
 
   private void processLineString(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter) throws IOException, ValidationException {
