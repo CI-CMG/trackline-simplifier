@@ -16,15 +16,21 @@ public class GeoJsonMultiLineProcessor {
   private final ObjectMapper objectMapper;
   private final int geoJsonPrecision;
   private final double maxAllowedSpeedKnts;
+  private final boolean allowDuplicateTimestamps;
 
-  public GeoJsonMultiLineProcessor(ObjectMapper objectMapper, int geoJsonPrecision, double maxAllowedSpeedKnts) {
+  public GeoJsonMultiLineProcessor(ObjectMapper objectMapper, int geoJsonPrecision, double maxAllowedSpeedKnts,  boolean allowDuplicateTimestamps) {
     this.objectMapper = objectMapper;
     this.geoJsonPrecision = geoJsonPrecision;
     this.maxAllowedSpeedKnts = maxAllowedSpeedKnts;
+    this.allowDuplicateTimestamps = allowDuplicateTimestamps;
+  }
+
+  public GeoJsonMultiLineProcessor(ObjectMapper objectMapper, int geoJsonPrecision, double maxAllowedSpeedKnts) {
+    this(objectMapper, geoJsonPrecision, maxAllowedSpeedKnts, false);
   }
 
   public void process(InputStream in, OutputStream out, OutputStream wktOut, Map<String, Object> additionalProperties) throws ValidationException {
-    GeoJsonMultiLineParser parser = new GeoJsonMultiLineParser(objectMapper, geoJsonPrecision, maxAllowedSpeedKnts);
+    GeoJsonMultiLineParser parser = new GeoJsonMultiLineParser(objectMapper, geoJsonPrecision, maxAllowedSpeedKnts, allowDuplicateTimestamps);
     try (
         JsonParser jsonParser = getJsonParser(in);
         JsonGenerator jsonGenerator = getGenerator(out);

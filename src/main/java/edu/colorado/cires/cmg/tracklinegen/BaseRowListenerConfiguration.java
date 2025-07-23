@@ -15,6 +15,7 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
   private final double maxAllowedSpeedKnts;
   private final GeometryFactory geometryFactory;
   private final int geoJsonPrecision;
+  private final boolean allowDuplicateTimeStamps;
 
   private BaseRowListenerConfiguration(Builder<T> builder) {
 
@@ -28,6 +29,7 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
     maxAllowedSpeedKnts = builder.maxAllowedSpeedKnts;
     geometryFactory = builder.geometryFactory;
     geoJsonPrecision = builder.geoJsonPrecision;
+    allowDuplicateTimeStamps = builder.allowDuplicateTimeStamps;
 
   }
 
@@ -71,16 +73,22 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
     return geoJsonPrecision;
   }
 
+  public boolean isAllowDuplicateTimeStamps() {
+    return allowDuplicateTimeStamps;
+  }
+
   public static <T extends DataRow> Builder<T> configure() {
     return new Builder<>();
   }
 
-  public static <T extends DataRow> Builder<T> configure(BaseRowListenerConfiguration<T> properties) {
+  public static <T extends DataRow> Builder<T> configure(
+    BaseRowListenerConfiguration<T> properties) {
     return new Builder<>(properties);
   }
 
   public static class Builder<T extends DataRow> {
 
+    public boolean allowDuplicateTimeStamps;
     private long nmSplit;
     private long msSplit;
     private GeometrySimplifier geometrySimplifier;
@@ -107,6 +115,7 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
       maxAllowedSpeedKnts = properties.maxAllowedSpeedKnts;
       geometryFactory = properties.geometryFactory;
       geoJsonPrecision = properties.geoJsonPrecision;
+      allowDuplicateTimeStamps = properties.allowDuplicateTimeStamps;
     }
 
     public Builder<T> withNmSplit(Long nmSplit) {
@@ -158,6 +167,11 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
 
     public Builder<T> withGeoJsonPrecision(int geoJsonPrecision) {
       this.geoJsonPrecision = geoJsonPrecision;
+      return this;
+    }
+
+    public Builder<T> withAllowDuplicateTimeStamps(boolean allowDuplicateTimeStamps) {
+      this.allowDuplicateTimeStamps = allowDuplicateTimeStamps;
       return this;
     }
 

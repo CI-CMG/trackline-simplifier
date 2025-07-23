@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import org.geotools.referencing.GeodeticCalculator;
 import org.geotools.referencing.datum.DefaultEllipsoid;
+import org.jetbrains.annotations.Nullable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
@@ -35,7 +37,18 @@ public final class AntimeridianUtils {
   }
 
   public static double getSpeed(double maxAllowedSpeedKnts, Coordinate c1, Coordinate c2, double m) throws ValidationException {
-    double s = (c2.getZ() - c1.getZ()) / 1000D;
+    return Objects.requireNonNull(getSpeed(maxAllowedSpeedKnts, c1, c2, m, false));
+  }
+
+  public static @Nullable Double getSpeed(double maxAllowedSpeedKnts, Coordinate c1, Coordinate c2, double m, boolean allowDuplicateTimestamps) throws ValidationException {
+    double time2 = c2.getZ();
+    double time1 = c1.getZ();
+
+    if (allowDuplicateTimestamps && time2 == time1) {
+      return null;
+    }
+
+    double s = (time2 - time1) / 1000D;
     if (s == 0D && m == 0D) {
         return 0D;  //allow duplicate points
     }

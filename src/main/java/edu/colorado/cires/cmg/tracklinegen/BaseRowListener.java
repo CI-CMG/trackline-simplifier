@@ -36,9 +36,9 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   private boolean started;
   private List<PointState> pointBuffer;
+  private final boolean allowDuplicateTimestamps;
 
   /**
-   *
    * @param msSplit
    * @param geometrySimplifier
    * @param lineWriter
@@ -48,20 +48,20 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
    * @param geometryFactory
    * @param geoJsonPrecision
    * @deprecated Use {@link BaseRowListener#BaseRowListener(BaseRowListenerConfiguration)}
-   *
    */
   @Deprecated
   public BaseRowListener(
-      long msSplit,
-      GeometrySimplifier geometrySimplifier,
-      GeoJsonMultiLineWriter lineWriter,
-      int batchSize,
-      Predicate<T> filterRow,
-      long maxAllowedSimplifiedPoints,
-      GeometryFactory geometryFactory,
-      int geoJsonPrecision
+    long msSplit,
+    GeometrySimplifier geometrySimplifier,
+    GeoJsonMultiLineWriter lineWriter,
+    int batchSize,
+    Predicate<T> filterRow,
+    long maxAllowedSimplifiedPoints,
+    GeometryFactory geometryFactory,
+    int geoJsonPrecision
   ) {
-    this(msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints, geometryFactory, geoJsonPrecision, 0D);
+    this(msSplit, geometrySimplifier, lineWriter, batchSize, filterRow, maxAllowedSimplifiedPoints,
+      geometryFactory, geoJsonPrecision, 0D);
   }
 
   @Deprecated
@@ -69,27 +69,28 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
    * @deprecated Use {@link BaseRowListener#BaseRowListener(BaseRowListenerConfiguration)}
    */
   public BaseRowListener(
-      long msSplit,
-      GeometrySimplifier geometrySimplifier,
-      GeoJsonMultiLineWriter lineWriter,
-      int batchSize,
-      Predicate<T> filterRow,
-      long maxAllowedSimplifiedPoints,
-      GeometryFactory geometryFactory,
-      int geoJsonPrecision,
-      double maxAllowedSpeedKnts
+    long msSplit,
+    GeometrySimplifier geometrySimplifier,
+    GeoJsonMultiLineWriter lineWriter,
+    int batchSize,
+    Predicate<T> filterRow,
+    long maxAllowedSimplifiedPoints,
+    GeometryFactory geometryFactory,
+    int geoJsonPrecision,
+    double maxAllowedSpeedKnts
   ) {
     this(BaseRowListenerConfiguration.<T>configure()
-        .withMsSplit(msSplit)
-        .withGeometrySimplifier(geometrySimplifier)
-        .withLineWriter(lineWriter)
-        .withBatchSize(batchSize)
-        .withFilterRow(filterRow)
-        .withMaxAllowedSimplifiedPoints(maxAllowedSimplifiedPoints)
-        .withGeometryFactory(geometryFactory)
-        .withGeoJsonPrecision(geoJsonPrecision)
-        .withMaxAllowedSpeedKnts(maxAllowedSpeedKnts)
-        .build());
+      .withMsSplit(msSplit)
+      .withGeometrySimplifier(geometrySimplifier)
+      .withLineWriter(lineWriter)
+      .withBatchSize(batchSize)
+      .withFilterRow(filterRow)
+      .withMaxAllowedSimplifiedPoints(maxAllowedSimplifiedPoints)
+      .withGeometryFactory(geometryFactory)
+      .withGeoJsonPrecision(geoJsonPrecision)
+      .withMaxAllowedSpeedKnts(maxAllowedSpeedKnts)
+      .withAllowDuplicateTimeStamps(false)
+      .build());
   }
 
   public BaseRowListener(BaseRowListenerConfiguration<T> config) {
@@ -108,6 +109,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     }
     format = new DecimalFormat(sb.toString(), DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     this.maxAllowedSpeedKnts = config.getMaxAllowedSpeedKnts();
+    this.allowDuplicateTimestamps = config.isAllowDuplicateTimeStamps();
   }
 
   @Override
@@ -150,7 +152,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     Sign sign = null;
     for (int i = index - 1; i >= 0; i--) {
       Coordinate coordinate = coordinates.get(i);
-      if(!is180(coordinate)) {
+      if (!is180(coordinate)) {
         sign = coordinate.getX() < 0D ? Sign.NEGATIVE : Sign.POSITIVE;
         break;
       }
@@ -162,7 +164,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     Sign sign = null;
     for (int i = index + 1; i < coordinates.size(); i++) {
       Coordinate coordinate = coordinates.get(i);
-      if(!is180(coordinate)) {
+      if (!is180(coordinate)) {
         sign = coordinate.getX() < 0D ? Sign.NEGATIVE : Sign.POSITIVE;
         break;
       }
@@ -179,11 +181,12 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     for (int i = 0; i < coordinates.size(); i++) {
       Coordinate coordinate = coordinates.get(i);
 
-      if(is180(coordinate)) {
+      if (is180(coordinate)) {
         Sign sign = findPreviousSign(coordinates, i);
-        if(sign == null) {
+        if (sign == null) {
           sign = findNextSign(coordinates, i);
-        } if (sign == null) {
+        }
+        if (sign == null) {
           sign = Sign.POSITIVE;
         }
         double correctedX;
@@ -202,27 +205,25 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
         Coordinate c2 = new Coordinate(correctedX, y, time);
 
-        if(i > 0) {
+        if (i > 0) {
           Coordinate c1 = corrected.get(i - 1);
           double m = getDistance(c1, c2);
           try {
-            getSpeed(maxAllowedSpeedKnts, c1, c2, m);
+            getSpeed(maxAllowedSpeedKnts, c1, c2, m, allowDuplicateTimestamps);
           } catch (ValidationException e) {
             throw new IllegalStateException("Invalid speed", e);
           }
         }
 
-
         corrected.add(c2);
 
 
-
       } else {
-        if(i > 0) {
+        if (i > 0) {
           Coordinate c1 = corrected.get(i - 1);
           double m = getDistance(c1, coordinate);
           try {
-            getSpeed(maxAllowedSpeedKnts, c1, coordinate, m);
+            getSpeed(maxAllowedSpeedKnts, c1, coordinate, m, allowDuplicateTimestamps);
           } catch (ValidationException e) {
             throw new IllegalStateException("Invalid speed", e);
           }
@@ -245,12 +246,14 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     if (segment.size() > 1) {
       int startIndex = segment.get(0).getIndex();
       LineString simplified = simplify(
-          correctSigns(segment.stream().map(PointState::getPoint).map(Point::getCoordinate).collect(Collectors.toList())));
+        correctSigns(segment.stream().map(PointState::getPoint).map(Point::getCoordinate)
+          .collect(Collectors.toList())));
       simplified = correctSigns(simplified);
       Coordinate[] coordinates = simplified.getCoordinateSequence().toCoordinateArray();
       simplifiedSegment = new ArrayList<>();
       for (int i = 0; i < coordinates.length; i++) {
-        if (i == 0 || coordinates.length > 2 || distance(coordinates[0], coordinates[1]) > minDistance) {
+        if (i == 0 || coordinates.length > 2
+          || distance(coordinates[0], coordinates[1]) > minDistance) {
           Coordinate coordinate = coordinates[i];
           PointState pointState = new PointState(geometryFactory.createPoint(coordinate), true);
           pointState.setSimplified(true);
@@ -304,8 +307,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private List<List<PointState>> simplifySegments(List<List<PointState>> segments) {
 
     List<List<PointState>> simplified = removeSingletons(
-        segments.stream().map(this::simplifySegment).collect(Collectors.toList()),
-        started
+      segments.stream().map(this::simplifySegment).collect(Collectors.toList()),
+      started
     );
 
     int count = simplified.stream().map(List::size).reduce(0, Integer::sum);
@@ -346,7 +349,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     return segments;
   }
 
-  private static List<List<PointState>> removeSingletons(List<List<PointState>> segments, boolean started) {
+  private static List<List<PointState>> removeSingletons(List<List<PointState>> segments,
+    boolean started) {
 
     List<List<PointState>> filtered = new ArrayList<>();
     for (int i = 0; i < segments.size(); i++) {
@@ -361,7 +365,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     }
 
     // remove the first segment if it is a singleton and there are other non-singletons
-    if (filtered.size() > 1 && filtered.get(0).size() == 1 && filtered.get(0).get(0).getIndex() == 0) {
+    if (filtered.size() > 1 && filtered.get(0).size() == 1
+      && filtered.get(0).get(0).getIndex() == 0) {
       filtered = filtered.subList(1, filtered.size());
     }
 
@@ -369,23 +374,28 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private void writeSimplified() {
-    final List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()), started);
+    final List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()),
+      started);
     int count = segments.stream().map(List::size).reduce(0, Integer::sum);
     if (count <= batchSize) {
-      pointBuffer = segments.stream().flatMap(List::stream).collect(Collectors.toCollection(ArrayList::new));
+      pointBuffer = segments.stream().flatMap(List::stream)
+        .collect(Collectors.toCollection(ArrayList::new));
     } else {
-      pointBuffer = simplifySegments(segments).stream().flatMap(List::stream).collect(Collectors.toCollection(ArrayList::new));
+      pointBuffer = simplifySegments(segments).stream().flatMap(List::stream)
+        .collect(Collectors.toCollection(ArrayList::new));
     }
   }
 
   private double distance(Coordinate coordinate1, Coordinate coordinate2) {
-    return geometryFactory.createPoint(coordinate1).distance(geometryFactory.createPoint(coordinate2));
+    return geometryFactory.createPoint(coordinate1)
+      .distance(geometryFactory.createPoint(coordinate2));
   }
 
   @Override
   public void processRow(T row) {
     unsimplifiedPointCount++;
-    PointState pointState = new PointState(geometryFactory.createPoint(toCoordinate(row)), isDesiredRowType(row));
+    PointState pointState = new PointState(geometryFactory.createPoint(toCoordinate(row)),
+      isDesiredRowType(row));
     if (pointState.isTarget()) {
       targetPointCount++;
     }
@@ -408,7 +418,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   @Override
   public void finish() {
 
-    final List<List<PointState>> segments = simplifySegments(removeSingletons(removeNonTarget(splitBufferSegments()), started));
+    final List<List<PointState>> segments = simplifySegments(
+      removeSingletons(removeNonTarget(splitBufferSegments()), started));
 
     boolean lineString = false;
 
@@ -433,10 +444,10 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     }
 
     GeometryProperties properties = GeometryProperties.Builder.configure()
-        .withSimplifiedPointCount(simplifiedPointCount)
-        .withUnsimplifiedPointCount(unsimplifiedPointCount)
-        .withTargetPointCount(targetPointCount)
-        .build();
+      .withSimplifiedPointCount(simplifiedPointCount)
+      .withUnsimplifiedPointCount(unsimplifiedPointCount)
+      .withTargetPointCount(targetPointCount)
+      .build();
 
     lineWriter.finish(properties, lineString);
   }
@@ -451,14 +462,16 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
     }
     if (isSplittingByMsEnabled()) {
-      double difference = point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ();
+      double difference =
+        point2.getPoint().getCoordinate().getZ() - point1.getPoint().getCoordinate().getZ();
       if (difference > msSplit) {
         return true;
       }
     }
     if (isSplittingByNmEnabled()) {
       // Calculate distance between two points by retrieving distance in meters and converting to nautical miles
-      double distance = (getDistance(point1.getPoint().getCoordinate(), point2.getPoint().getCoordinate()) / 1852);
+      double distance = (
+        getDistance(point1.getPoint().getCoordinate(), point2.getPoint().getCoordinate()) / 1852);
       return distance > nmSplit;
     }
     return false;
@@ -490,7 +503,8 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private void incrementSimplifiedPointCount() {
     if (maxAllowedSimplifiedPoints > 0 && simplifiedPointCount > maxAllowedSimplifiedPoints) {
       throw new SimplifiedPointCountExceededException(
-          "Simplified point count exceeded: allowed = " + maxAllowedSimplifiedPoints + " batched points = " + simplifiedPointCount
+        "Simplified point count exceeded: allowed = " + maxAllowedSimplifiedPoints
+          + " batched points = " + simplifiedPointCount
       );
     }
     simplifiedPointCount++;
@@ -503,10 +517,9 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private Coordinate toCoordinate(T row) {
     if (row.getTimestamp() == null) {
       return new Coordinate(round(row.getLon()), round(row.getLat()));
-    }
-
-    else {
-      return new Coordinate(round(row.getLon()), round(row.getLat()), row.getTimestamp().toEpochMilli());
+    } else {
+      return new Coordinate(round(row.getLon()), round(row.getLat()),
+        row.getTimestamp().toEpochMilli());
     }
   }
 
