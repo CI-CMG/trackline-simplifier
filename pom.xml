@@ -172,6 +172,12 @@
       <version>${commons-text.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>26.0.2</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -347,6 +353,14 @@
         </executions>
         <configuration>
           <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
     </plugins>
