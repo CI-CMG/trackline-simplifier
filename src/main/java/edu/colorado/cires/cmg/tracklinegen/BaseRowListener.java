@@ -171,7 +171,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private static boolean is180(Coordinate coordinate) {
-    return Math.abs(coordinate.getX()) - 180D == 0D;
+    return AntimeridianUtils.doubleEquals(Math.abs(coordinate.getX()) - 180D, 0D);
   }
 
   private List<Coordinate> correctSigns(List<Coordinate> coordinates) {

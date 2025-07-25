@@ -18,6 +18,7 @@ import org.locationtech.spatial4j.shape.jts.JtsGeometry;
 
 public final class AntimeridianUtils {
 
+  private static final double DOUBLE_EPSILON = 0.00000001;
   private static final double METERS_PER_NMILE = 1852D;
   private static final double SECONDS_PER_HOUR = 3600D;
   private static final double KN_PER_MPS = SECONDS_PER_HOUR / METERS_PER_NMILE;
@@ -26,8 +27,12 @@ public final class AntimeridianUtils {
 
   }
 
+  public static boolean doubleEquals(double a, double b) {
+    return Math.abs(a - b) <= DOUBLE_EPSILON;
+  }
+
   private static boolean signsEqual(double s1, double s2) {
-   return ((s1 < 0D && s2 < 0D) || (s1 > 0D && s2 > 0D) || (s1 == 0D && s2 == 0D));
+   return ((s1 < 0D && s2 < 0D) || (s1 > 0D && s2 > 0D) || (doubleEquals(s1, 0D) && doubleEquals(s2, 0D)));
   }
 
   private static double mpsToKnots(double metersPerSecond) {
@@ -36,7 +41,7 @@ public final class AntimeridianUtils {
 
   public static double getSpeed(double maxAllowedSpeedKnts, Coordinate c1, Coordinate c2, double m) throws ValidationException {
     double s = (c2.getZ() - c1.getZ()) / 1000D;
-    if (s == 0D && m == 0D) {
+    if (doubleEquals(s, 0D) && doubleEquals(m, 0D)) {
         return 0D;  //allow duplicate points
     }
     double metersPerSecond = m / s;
@@ -55,7 +60,7 @@ public final class AntimeridianUtils {
   }
 
   private static boolean is180(Coordinate coordinate) {
-    return coordinate.getX() == 180D || coordinate.getX() == -180D;
+    return doubleEquals(coordinate.getX(), 180D) || doubleEquals(coordinate.getX(), -180D);
   }
 
   public static List<Coordinate> splitAm(Coordinate last,  Coordinate current, GeometryFactory geometryFactory) {
