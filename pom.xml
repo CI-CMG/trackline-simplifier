@@ -55,6 +55,8 @@
     <commons-text.version>1.12.0</commons-text.version>
     <slf4j.version>1.7.36</slf4j.version>
     <nvdApiKey>${env.NVD_API_KEY}</nvdApiKey>
+    <ossIndexUsername>${env.OSS_INDEX_USERNAME}</ossIndexUsername>
+    <ossIndexPassword>${env.OSS_INDEX_PASSWORD}</ossIndexPassword>
     <git.username />
     <git.password />
   </properties>
