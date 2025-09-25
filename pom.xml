@@ -300,6 +300,7 @@
           <publishingServerId>central</publishingServerId>
           <autoPublish>true</autoPublish>
           <waitUntil>published</waitUntil>
+          <centralBaseUrl>https://ossrh-staging-api.central.sonatype.com</centralBaseUrl>
         </configuration>
       </plugin>
 
