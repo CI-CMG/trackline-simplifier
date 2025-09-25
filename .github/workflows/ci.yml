@@ -18,12 +18,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: build with maven
-        run: |
-          echo ${#OSS_INDEX_USERNAME}
-          echo ${#OSS_INDEX_PASSWORD}
-          echo ${OSS_INDEX_USERNAME}
-          echo ${OSS_INDEX_PASSWORD}
-          mvn -B -s settings.xml clean deploy -Pdep-check
+        run: mvn -B -s settings.xml clean deploy -Pdep-check
         env:
           NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
           SIGN_KEY_PASS: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
