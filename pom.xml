@@ -34,14 +34,6 @@
     <tag>HEAD</tag>
   </scm>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>ossrh</id>
-      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-  </distributionManagement>
-
-
   <properties>
     <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -300,7 +292,6 @@
           <publishingServerId>central</publishingServerId>
           <autoPublish>true</autoPublish>
           <waitUntil>published</waitUntil>
-          <centralBaseUrl>https://ossrh-staging-api.central.sonatype.com</centralBaseUrl>
         </configuration>
       </plugin>
 
