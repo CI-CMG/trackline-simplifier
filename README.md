@@ -2,7 +2,13 @@
 The trackline-simplifier creates a simplified geometry from a source of longitude, latitude, and timestamped coordinates.
 
 ## Using Library In Your Project
-TODO
+```xml
+<dependency>
+    <groupId>io.github.ci-cmg</groupId>
+    <artifactId>trackline-simplifier</artifactId>
+    <version>3.0.0</version>
+</dependency>
+```
 
 ## Runtime Requirements
 - Java 8
