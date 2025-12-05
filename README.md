@@ -11,7 +11,7 @@ The trackline-simplifier creates a simplified geometry from a source of longitud
 ```
 
 ## Runtime Requirements
-- Java 8
+- Java 11
 
 ## Building From Source
 Maven 3.6.0+ is required.
