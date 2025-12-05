@@ -4,7 +4,7 @@
 
   <groupId>io.github.ci-cmg</groupId>
   <artifactId>trackline-simplifier</artifactId>
-  <version>3.0.0</version>
+  <version>3.0.1-SNAPSHOT</version>
 
   <name>${project.groupId}:${project.artifactId}</name>
   <description>
@@ -31,7 +31,7 @@
     <connection>scm:git:https://github.com/CI-CMG/trackline-simplifier.git</connection>
     <developerConnection>scm:git:https://github.com/CI-CMG/trackline-simplifier.git</developerConnection>
     <url>https://github.com/CI-CMG/trackline-simplifier</url>
-    <tag>v3.0.0</tag>
+    <tag>3.0</tag>
   </scm>
 
   <properties>
