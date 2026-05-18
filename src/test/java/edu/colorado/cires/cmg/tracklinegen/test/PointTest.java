@@ -3,10 +3,15 @@ package edu.colorado.cires.cmg.tracklinegen.test;
 import static edu.colorado.cires.cmg.tracklinegen.JsonPropertiesUtils.assertJsonEquivalent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import edu.colorado.cires.cmg.tracklinegen.BaseRowListener;
+import edu.colorado.cires.cmg.tracklinegen.BaseRowListenerConfiguration;
+import edu.colorado.cires.cmg.tracklinegen.DataRow;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineProcessor;
+import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineWriter;
 import edu.colorado.cires.cmg.tracklinegen.GeometrySimplifier;
 import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.GeoSimplifierProcessor;
 import java.io.ByteArrayOutputStream;
@@ -15,9 +20,17 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.geojson.GeoJsonReader;
 
 public class PointTest {
 
@@ -183,6 +196,82 @@ public class PointTest {
 
   }
 
+  @ParameterizedTest
+  @ValueSource(booleans =  {true, false})
+  void testKeepPoints(boolean retainPoints) throws Exception {
+
+    MultiPoint expectedPoints = geometryFactory.createMultiPointFromCoords(new Coordinate[]{
+      new Coordinate(-40, 40),
+      new Coordinate(-70, 40),
+      new Coordinate(-87, 45),
+      new Coordinate(-125, 40),
+      new Coordinate(-150, 61.05),
+      new Coordinate(-90, 30.1),
+    });
+
+    GeometrySimplifier geometrySimplifier = new GeometrySimplifier(0.0001);
+    ObjectMapper objectMapper = new ObjectMapper();
+    GeoJsonReader reader = new GeoJsonReader(geometryFactory);
+
+    ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
+    try (
+      JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(geoJsonOut);
+      Stream<String> inputLines = Files.lines(Paths.get("src/test/resources/points_data.xyz"));
+    ) {
+
+      GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, 5);
+
+      BaseRowListener<DataRow> listener = new BaseRowListener<>(BaseRowListenerConfiguration.configure()
+        .withGeoJsonPrecision(5)
+        .withBatchSize(3000)
+        .withNmSplit(0L)
+        .withMsSplit(3600000L)
+        .withGeometrySimplifier(geometrySimplifier)
+        .withFilterRow(__ -> true)
+        .withLineWriter(lineWriter)
+        .withMaxAllowedSimplifiedPoints(10000L)
+        .withMaxAllowedSpeedKnts(-1D)
+        .withGeometryFactory(geometryFactory)
+        .withRetainPoints(retainPoints)
+        .build());
+
+
+      listener.start();
+      inputLines.forEach(line -> {
+        String[] parts = line.split(",");
+
+        if (parts[0].equals("LAT")) { // CSV header, skip line
+          return;
+        }
+
+        double latitude = Double.parseDouble(parts[0]);
+        double longitude = Double.parseDouble(parts[1]);
+        long time = Long.parseLong(parts[3]);
+
+        listener.processRow(new DataRow() {
+          @Override
+          public Instant getTimestamp() {
+            return Instant.ofEpochMilli(time);
+          }
+
+          @Override
+          public Double getLon() {
+            return longitude;
+          }
+
+          @Override
+          public Double getLat() {
+            return latitude;
+          }
+        });
+      });
+      listener.finish();
+
+    }
+
+    Geometry result = reader.read(geoJsonOut.toString());
+    assertEquals(retainPoints, result.contains(expectedPoints));
+  }
 
   @Test
   public void testSimplifiedPoint2() throws Exception {

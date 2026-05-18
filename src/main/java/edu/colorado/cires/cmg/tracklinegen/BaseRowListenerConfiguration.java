@@ -15,6 +15,7 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
   private final double maxAllowedSpeedKnts;
   private final GeometryFactory geometryFactory;
   private final int geoJsonPrecision;
+  private final boolean retainPoints;
 
   private BaseRowListenerConfiguration(Builder<T> builder) {
 
@@ -28,7 +29,7 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
     maxAllowedSpeedKnts = builder.maxAllowedSpeedKnts;
     geometryFactory = builder.geometryFactory;
     geoJsonPrecision = builder.geoJsonPrecision;
-
+    retainPoints = builder.retainPoints;
   }
 
   public long getNmSplit() {
@@ -71,6 +72,10 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
     return geoJsonPrecision;
   }
 
+  public boolean isRetainPoints() {
+    return retainPoints;
+  }
+
   public static <T extends DataRow> Builder<T> configure() {
     return new Builder<>();
   }
@@ -91,6 +96,7 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
     private double maxAllowedSpeedKnts;
     private GeometryFactory geometryFactory;
     private int geoJsonPrecision;
+    private boolean retainPoints = false;
 
     private Builder() {
 
@@ -107,6 +113,7 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
       maxAllowedSpeedKnts = properties.maxAllowedSpeedKnts;
       geometryFactory = properties.geometryFactory;
       geoJsonPrecision = properties.geoJsonPrecision;
+      retainPoints = properties.retainPoints;
     }
 
     public Builder<T> withNmSplit(Long nmSplit) {
@@ -158,6 +165,11 @@ public class BaseRowListenerConfiguration<T extends DataRow> {
 
     public Builder<T> withGeoJsonPrecision(int geoJsonPrecision) {
       this.geoJsonPrecision = geoJsonPrecision;
+      return this;
+    }
+
+    public Builder<T> withRetainPoints(boolean retainPoints) {
+      this.retainPoints = retainPoints;
       return this;
     }
 
