@@ -33,6 +33,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   private final GeometryFactory geometryFactory;
   private final double minDistance;
   private final DecimalFormat format;
+  private final boolean retainPoints;
 
   private boolean started;
   private List<PointState> pointBuffer;
@@ -89,6 +90,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         .withGeometryFactory(geometryFactory)
         .withGeoJsonPrecision(geoJsonPrecision)
         .withMaxAllowedSpeedKnts(maxAllowedSpeedKnts)
+        .withRetainPoints(false)
         .build());
   }
 
@@ -102,6 +104,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     this.maxAllowedSimplifiedPoints = config.getMaxAllowedSimplifiedPoints();
     this.geometryFactory = config.getGeometryFactory();
     this.minDistance = 1d / Math.pow(10d, config.getGeoJsonPrecision());
+    this.retainPoints = config.isRetainPoints();
     StringBuilder sb = new StringBuilder("0.");
     for (int i = 1; i <= config.getGeoJsonPrecision(); i++) {
       sb.append("#");
@@ -302,11 +305,10 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private List<List<PointState>> simplifySegments(List<List<PointState>> segments) {
-
-    List<List<PointState>> simplified = removeSingletons(
-        segments.stream().map(this::simplifySegment).collect(Collectors.toList()),
-        started
-    );
+    List<List<PointState>> simplified = segments.stream().map(this::simplifySegment).collect(Collectors.toList());
+    if (!retainPoints) {
+      simplified = removeSingletons(simplified, started);
+    }
 
     int count = simplified.stream().map(List::size).reduce(0, Integer::sum);
     if (count < batchSize) {
@@ -369,7 +371,11 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private void writeSimplified() {
-    final List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()), started);
+    List<List<PointState>> segments = removeNonTarget(splitBufferSegments());
+    if (!retainPoints) {
+      segments = removeSingletons(segments, started);
+    }
+
     int count = segments.stream().map(List::size).reduce(0, Integer::sum);
     if (count <= batchSize) {
       pointBuffer = segments.stream().flatMap(List::stream).collect(Collectors.toCollection(ArrayList::new));
@@ -407,8 +413,19 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   @Override
   public void finish() {
-
-    final List<List<PointState>> segments = simplifySegments(removeSingletons(removeNonTarget(splitBufferSegments()), started));
+    List<List<PointState>> segments = removeNonTarget(splitBufferSegments());
+    if  (!retainPoints) {
+      segments = simplifySegments(removeSingletons(segments, started));
+    } else {
+      segments = simplifySegments(segments);
+      for (int i = 0; i < segments.size(); i++) {
+        List<PointState> pointStates = segments.get(i);
+        if (pointStates.size() == 1) {
+          PointState pointState = pointStates.get(0);
+          segments.set(i, List.of(pointState, pointState));
+        }
+      }
+    }
 
     boolean lineString = false;
 
