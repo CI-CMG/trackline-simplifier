@@ -216,7 +216,7 @@ public class PointTest {
     ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
     try (
       JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(geoJsonOut);
-      Stream<String> inputLines = Files.lines(Paths.get("src/test/resources/points_data.xyz"));
+      Stream<String> inputLines = Files.lines(Paths.get("src/test/resources/points_data.csv"));
     ) {
 
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, 5);
