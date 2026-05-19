@@ -2,6 +2,9 @@ package edu.colorado.cires.cmg.tracklinegen.test;
 
 import static edu.colorado.cires.cmg.tracklinegen.JsonPropertiesUtils.assertJsonEquivalent;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +30,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
@@ -270,7 +275,20 @@ public class PointTest {
     }
 
     Geometry result = reader.read(geoJsonOut.toString());
-    assertEquals(retainPoints, result.contains(expectedPoints));
+
+    if (retainPoints) {
+      GeometryCollection geometryCollection = assertInstanceOf(GeometryCollection.class, result);
+
+      assertEquals(2, geometryCollection.getNumGeometries());
+      MultiLineString multiLineString = assertInstanceOf(MultiLineString.class, geometryCollection.getGeometryN(0));
+      assertFalse(multiLineString.contains(expectedPoints));
+      MultiPoint multiPoint = assertInstanceOf(MultiPoint.class, geometryCollection.getGeometryN(1));
+      assertTrue(multiPoint.contains(expectedPoints));
+      assertEquals(multiPoint.getNumPoints(), expectedPoints.getNumPoints());
+    } else {
+      assertInstanceOf(MultiLineString.class, result);
+      assertFalse(result.contains(expectedPoints));
+    }
   }
 
   @Test
