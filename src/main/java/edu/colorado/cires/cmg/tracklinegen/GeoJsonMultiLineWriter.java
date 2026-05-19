@@ -37,6 +37,22 @@ public class GeoJsonMultiLineWriter {
     }
   }
 
+  public void startCollection() {
+    try {
+      jsonGenerator.writeStartObject();
+      jsonGenerator.writeFieldName("type");
+      jsonGenerator.writeString("Feature");
+      jsonGenerator.writeFieldName("geometry");
+      jsonGenerator.writeStartObject();
+      jsonGenerator.writeFieldName("type");
+      jsonGenerator.writeString("GeometryCollection");
+      jsonGenerator.writeFieldName("geometries");
+      jsonGenerator.writeStartArray();
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to write GeoJson", e);
+    }
+  }
+
   public void start() {
     try {
       jsonGenerator.writeStartObject();
@@ -46,6 +62,39 @@ public class GeoJsonMultiLineWriter {
       jsonGenerator.writeStartObject();
       jsonGenerator.writeFieldName("type");
       jsonGenerator.writeString("MultiLineString");
+      jsonGenerator.writeFieldName("coordinates");
+      jsonGenerator.writeStartArray();
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to write GeoJson", e);
+    }
+  }
+
+  public void startMultiLineString() {
+    try {
+      jsonGenerator.writeStartObject();
+      jsonGenerator.writeFieldName("type");
+      jsonGenerator.writeString("MultiLineString");
+      jsonGenerator.writeFieldName("coordinates");
+      jsonGenerator.writeStartArray();
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to write GeoJson", e);
+    }
+  }
+
+  public void endGeometry() {
+    try {
+      jsonGenerator.writeEndArray();
+      jsonGenerator.writeEndObject();
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to write GeoJson", e);
+    }
+  }
+
+  public void startMultiPoint() {
+    try {
+      jsonGenerator.writeStartObject();
+      jsonGenerator.writeFieldName("type");
+      jsonGenerator.writeString("MultiPoint");
       jsonGenerator.writeFieldName("coordinates");
       jsonGenerator.writeStartArray();
     } catch (IOException e) {

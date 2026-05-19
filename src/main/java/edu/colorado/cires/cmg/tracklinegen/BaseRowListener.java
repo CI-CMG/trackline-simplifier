@@ -283,7 +283,10 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
       if (!segment.isEmpty() && segment.get(0).getIndex() == 0) {
         if (!started) {
-          lineWriter.start();
+          startGeometry();
+          if (retainPoints) {
+            lineWriter.startMultiLineString();
+          }
           started = true;
         }
         lineWriter.startLine();
@@ -408,35 +411,32 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       incrementSimplifiedPointCount();
       writeCoordinate(lastSingleton.get(0).get(0).getPoint().getCoordinate());
       lineWriter.endLine();
+      if (retainPoints) {
+        lineWriter.endGeometry();
+      }
     }
   }
 
   @Override
   public void finish() {
-    List<List<PointState>> segments = removeNonTarget(splitBufferSegments());
-    if  (!retainPoints) {
-      segments = simplifySegments(removeSingletons(segments, started));
-    } else {
-      segments = simplifySegments(segments);
-      for (int i = 0; i < segments.size(); i++) {
-        List<PointState> pointStates = segments.get(i);
-        if (pointStates.size() == 1) {
-          PointState pointState = pointStates.get(0);
-          segments.set(i, List.of(pointState, pointState));
-        }
-      }
+    List<List<PointState>> rawSegments = removeNonTarget(splitBufferSegments());
+    List<PointState> points = null;
+    List<List<PointState>> segments = simplifySegments(removeSingletons(rawSegments, started));
+
+    if (retainPoints) {
+      points = rawSegments.stream().filter(s -> s.size() == 1).flatMap(List::stream).collect(Collectors.toList());
     }
 
-    boolean lineString = false;
+    boolean isArray = false;
 
     if (started) {
       writeFinalSegments(segments);
-      lineString = true;
+      isArray = true;
     } else {
       int count = segments.stream().map(List::size).reduce(0, Integer::sum);
       if (count > 1) {
         writeFinalSegments(segments);
-        lineString = true;
+        isArray = true;
       } else if (count == 1) {
         lineWriter.startPoint();
         started = true;
@@ -444,9 +444,15 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         PointState pointState = segments.get(0).get(0);
         writeCoordinate(pointState.getPoint().getCoordinate());
       } else {
-        lineWriter.start();
-        lineString = true;
+        startGeometry();
+        isArray = true;
       }
+    }
+
+    if (points != null) {
+      lineWriter.startMultiPoint();
+      points.forEach(pointState -> writeCoordinate(pointState.getPoint().getCoordinate()));
+      lineWriter.endGeometry();
     }
 
     GeometryProperties properties = GeometryProperties.Builder.configure()
@@ -455,7 +461,15 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         .withTargetPointCount(targetPointCount)
         .build();
 
-    lineWriter.finish(properties, lineString);
+    lineWriter.finish(properties, isArray);
+  }
+
+  private void startGeometry() {
+    if (retainPoints) {
+      lineWriter.startCollection();
+    } else {
+      lineWriter.start();
+    }
   }
 
   private boolean isDesiredRowType(T row) {
