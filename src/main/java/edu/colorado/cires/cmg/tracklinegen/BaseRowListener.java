@@ -37,6 +37,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   private boolean started;
   private List<PointState> pointBuffer;
+  private List<PointState> points;
 
   /**
    *
@@ -116,6 +117,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   @Override
   public void start() {
     pointBuffer = new ArrayList<>();
+    points = new ArrayList<>(0);
   }
 
   private List<List<PointState>> splitBufferSegments() {
@@ -308,17 +310,14 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private List<List<PointState>> simplifySegments(List<List<PointState>> segments) {
-    List<List<PointState>> simplified = segments.stream().map(this::simplifySegment).collect(Collectors.toList());
-    if (!retainPoints) {
-      simplified = removeSingletons(simplified, started);
-    }
+    List<List<PointState>> simplified = removeSingletons(segments.stream().map(this::simplifySegment).collect(Collectors.toList()), started);
 
     int count = simplified.stream().map(List::size).reduce(0, Integer::sum);
     if (count < batchSize) {
       return simplified;
     }
 
-    return writeSegments(segments);
+    return writeSegments(simplified);
   }
 
   private static List<List<PointState>> removeNonTarget(List<List<PointState>> segments) {
@@ -351,9 +350,10 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
     return segments;
   }
 
-  private static List<List<PointState>> removeSingletons(List<List<PointState>> segments, boolean started) {
+  private List<List<PointState>> removeSingletons(List<List<PointState>> segments, boolean started) {
 
     List<List<PointState>> filtered = new ArrayList<>();
+
     for (int i = 0; i < segments.size(); i++) {
       List<PointState> segment = segments.get(i);
       if (segment.isEmpty()) {
@@ -362,11 +362,16 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       int lastIndex = segment.get(segment.size() - 1).getIndex();
       if (lastIndex > 0 || (i == 0 && !started) || i == segments.size() - 1) {
         filtered.add(segment);
+      } else if (retainPoints)  {
+        points.add(segment.get(0));
       }
     }
 
     // remove the first segment if it is a singleton and there are other non-singletons
     if (filtered.size() > 1 && filtered.get(0).size() == 1 && filtered.get(0).get(0).getIndex() == 0) {
+      if (retainPoints) {
+        points.add(filtered.get(0).get(0));
+      }
       filtered = filtered.subList(1, filtered.size());
     }
 
@@ -374,10 +379,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
   }
 
   private void writeSimplified() {
-    List<List<PointState>> segments = removeNonTarget(splitBufferSegments());
-    if (!retainPoints) {
-      segments = removeSingletons(segments, started);
-    }
+    List<List<PointState>> segments = removeSingletons(removeNonTarget(splitBufferSegments()), started);
 
     int count = segments.stream().map(List::size).reduce(0, Integer::sum);
     if (count <= batchSize) {
@@ -419,13 +421,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
 
   @Override
   public void finish() {
-    List<List<PointState>> rawSegments = removeNonTarget(splitBufferSegments());
-    List<PointState> points = null;
-    List<List<PointState>> segments = simplifySegments(removeSingletons(rawSegments, started));
-
-    if (retainPoints) {
-      points = rawSegments.stream().filter(s -> s.size() == 1).flatMap(List::stream).collect(Collectors.toList());
-    }
+    List<List<PointState>> segments = simplifySegments(removeNonTarget(splitBufferSegments()));
 
     boolean isArray = false;
 
@@ -449,7 +445,7 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
       }
     }
 
-    if (points != null) {
+    if (!points.isEmpty()) {
       lineWriter.startMultiPoint();
       points.forEach(pointState -> writeCoordinate(pointState.getPoint().getCoordinate()));
       lineWriter.endGeometry();

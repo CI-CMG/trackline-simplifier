@@ -154,7 +154,9 @@ public class GeoJsonMultiLineParser {
   }
 
   private void processGeometry(JsonParser jsonParser, JsonGenerator jsonGenerator, Writer wktWriter) throws IOException, ValidationException {
-    jsonParser.nextToken();
+    if (!jsonParser.getCurrentToken().equals(JsonToken.START_OBJECT)) {
+      jsonParser.nextToken();
+    }
     jsonGenerator.copyCurrentEvent(jsonParser); //start object
     if (jsonParser.getCurrentToken() != JsonToken.START_OBJECT) {
       throw new IllegalArgumentException("Geometry was not an object");
@@ -165,12 +167,29 @@ public class GeoJsonMultiLineParser {
       jsonGenerator.copyCurrentEvent(jsonParser);
       String fieldName = jsonParser.getCurrentName();
       if ("type".equals(fieldName)) {
-        featureType = verifyFeatureType(jsonParser, jsonGenerator, "MultiLineString", "Point");
+        featureType = verifyFeatureType(jsonParser, jsonGenerator, "MultiLineString", "Point", "GeometryCollection", "MultiPoint");
         if (featureType.equals("MultiLineString")) {
           wktWriter.write("MULTILINESTRING ");
-        } else {
+        } else if (featureType.equals("Point")) {
           wktWriter.write("POINT ");
+        } else if (featureType.equals("MultiPoint")) {
+          wktWriter.write("MULTIPOINT ");
+        } else {
+          wktWriter.write("GEOMETRYCOLLECTION ");
         }
+      } else if ("geometries".equals(fieldName)) {
+        wktWriter.write("(");
+        JsonToken jsonToken = jsonParser.nextToken();
+        jsonGenerator.copyCurrentEvent(jsonParser);
+        while (jsonToken != JsonToken.END_ARRAY) {
+          processGeometry(jsonParser, jsonGenerator, wktWriter);
+          jsonToken = jsonParser.nextToken();
+          if (jsonToken != JsonToken.END_ARRAY) {
+            wktWriter.write(",");
+          }
+        }
+        wktWriter.write(")");
+        jsonGenerator.copyCurrentEvent(jsonParser);
       } else if ("coordinates".equals(fieldName)) {
         processCoordinates(jsonParser, jsonGenerator, wktWriter, featureType);
         writeBBox(jsonGenerator);
@@ -206,6 +225,19 @@ public class GeoJsonMultiLineParser {
       wktWriter.write("(");
       processCoordinate(jsonParser, jsonGenerator, wktWriter);
       wktWriter.write(" )");
+    } else if (type.equals("MultiPoint")) {
+      lastCoordinate = null;
+      jsonParser.nextToken();
+      jsonGenerator.copyCurrentEvent(jsonParser); //start array
+      wktWriter.write("("); //start MultiPoint
+      if (jsonParser.getCurrentToken() != JsonToken.START_ARRAY) {
+        throw new IllegalArgumentException("coordinates was not an array");
+      }
+      while (jsonParser.nextToken() != JsonToken.END_ARRAY) {
+        processCoordinate(jsonParser, jsonGenerator, wktWriter);
+      }
+      jsonGenerator.copyCurrentEvent(jsonParser); //end array
+      wktWriter.write(")"); // end MultiPoint
     } else {
       throw new IllegalStateException("Unsupported type: " + type);
     }
