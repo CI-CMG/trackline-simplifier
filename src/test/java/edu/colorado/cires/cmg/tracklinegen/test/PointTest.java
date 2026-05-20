@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import edu.colorado.cires.cmg.tracklinegen.BaseRowListener;
 import edu.colorado.cires.cmg.tracklinegen.BaseRowListenerConfiguration;
 import edu.colorado.cires.cmg.tracklinegen.DataRow;
+import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineParser;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineProcessor;
 import edu.colorado.cires.cmg.tracklinegen.GeoJsonMultiLineWriter;
 import edu.colorado.cires.cmg.tracklinegen.GeometrySimplifier;
@@ -20,10 +22,12 @@ import edu.colorado.cires.cmg.tracklinegen.geometrySimplifier.GeoSimplifierProce
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,11 +39,14 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPoint;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 
 public class PointTest {
 
   private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+  private final WKTReader wktReader = new WKTReader();
+  private final GeoJsonReader geoJsonReader = new GeoJsonReader();
 
 
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -216,7 +223,6 @@ public class PointTest {
 
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(0.0001);
     ObjectMapper objectMapper = new ObjectMapper();
-    GeoJsonReader reader = new GeoJsonReader(geometryFactory);
 
     ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
     try (
@@ -274,21 +280,35 @@ public class PointTest {
 
     }
 
-    Geometry result = reader.read(geoJsonOut.toString());
-
-    if (retainPoints) {
-      GeometryCollection geometryCollection = assertInstanceOf(GeometryCollection.class, result);
-
-      assertEquals(2, geometryCollection.getNumGeometries());
-      MultiLineString multiLineString = assertInstanceOf(MultiLineString.class, geometryCollection.getGeometryN(0));
-      assertFalse(multiLineString.contains(expectedPoints));
-      MultiPoint multiPoint = assertInstanceOf(MultiPoint.class, geometryCollection.getGeometryN(1));
-      assertTrue(multiPoint.contains(expectedPoints));
-      assertEquals(multiPoint.getNumPoints(), expectedPoints.getNumPoints());
-    } else {
-      assertInstanceOf(MultiLineString.class, result);
-      assertFalse(result.contains(expectedPoints));
+    ByteArrayOutputStream geoJsonOutputStream = new ByteArrayOutputStream();
+    ByteArrayOutputStream wktOutputStream = new ByteArrayOutputStream();
+    try (
+      JsonParser jsonParser = objectMapper.getFactory().createParser(geoJsonOut.toByteArray());
+      JsonGenerator geoJsonGenerator = objectMapper.getFactory().createGenerator(geoJsonOutputStream);
+      PrintWriter wktWriter = new PrintWriter(wktOutputStream)
+    ) {
+      GeoJsonMultiLineParser geoJsonMultiLineParser = new GeoJsonMultiLineParser(objectMapper, 5, 0);
+      geoJsonMultiLineParser.parse(jsonParser, geoJsonGenerator, wktWriter);
     }
+
+    Consumer<Geometry> assertGeometry = geometry -> {
+      if (retainPoints) {
+        GeometryCollection geometryCollection = assertInstanceOf(GeometryCollection.class, geometry);
+
+        assertEquals(2, geometryCollection.getNumGeometries());
+        MultiLineString multiLineString = assertInstanceOf(MultiLineString.class, geometryCollection.getGeometryN(0));
+        assertFalse(multiLineString.contains(expectedPoints));
+        MultiPoint multiPoint = assertInstanceOf(MultiPoint.class, geometryCollection.getGeometryN(1));
+        assertTrue(multiPoint.contains(expectedPoints));
+        assertEquals(multiPoint.getNumPoints(), expectedPoints.getNumPoints());
+      } else {
+        assertInstanceOf(MultiLineString.class, geometry);
+        assertFalse(geometry.contains(expectedPoints));
+      }
+    };
+
+    assertGeometry.accept(geoJsonReader.read(geoJsonOutputStream.toString()));
+    assertGeometry.accept(wktReader.read(wktOutputStream.toString()));
   }
 
   @Test
