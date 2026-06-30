@@ -15,6 +15,11 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
           cache: maven
+      - name: cache maven dependencies and dep-check
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: m2
       - name: set up git
         run: git config --global user.email bloop@bloop.org && git config --global user.name 'Bloopy McBloopFace'
       - name: build with maven
