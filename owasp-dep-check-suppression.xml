@@ -7,4 +7,12 @@
     <packageUrl regex="true">^pkg:maven/org\.eclipse\.emf/org\.eclipse\.emf\.ecore\.xmi@.*$</packageUrl>
     <cve>CVE-2023-4218</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+    file name: jackson-databind-2.22.0.jar
+    reason: false positive, fixed in 2.21.5
+    ]]></notes>
+    <packageUrl regex="true">^pkg:maven/com\.fasterxml\.jackson\.core/jackson-databind@.*$</packageUrl>
+    <cve>CVE-2026-54515</cve>
+  </suppress>
 </suppressions>
