@@ -356,6 +356,7 @@
             <artifactId>dependency-check-maven</artifactId>
             <configuration>
               <failBuildOnCVSS>0</failBuildOnCVSS>
+              <nvdDatafeedUrl>https://ccog.colorado.edu/nvd/nvdcve-2.0-{0}.json.gz</nvdDatafeedUrl>
               <suppressionFiles>
                 <suppressionFile>owasp-dep-check-suppression.xml</suppressionFile>
               </suppressionFiles>
