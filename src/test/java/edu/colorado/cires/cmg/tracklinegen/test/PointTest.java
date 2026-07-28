@@ -27,24 +27,26 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryCollection;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.MultiLineString;
 import org.locationtech.jts.geom.MultiPoint;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 
 public class PointTest {
 
-  private final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+  private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
   private final WKTReader wktReader = new WKTReader();
   private final GeoJsonReader geoJsonReader = new GeoJsonReader();
 
@@ -115,18 +117,17 @@ public class PointTest {
 
   private String convertToIso(String orig) {
     //20191011T055216Z -> 2007-12-03T10:15:30.00Z
-    StringBuilder sb = new StringBuilder();
-    sb.append(orig.substring(0, 4))
-        .append("-")
-        .append(orig.substring(4, 6))
-        .append("-")
-        .append(orig.substring(6, 11))
-        .append(":")
-        .append(orig.substring(11, 13))
-        .append(":")
-        .append(orig.substring(13, 15))
-        .append(".000Z");
-    return sb.toString();
+    String sb = orig.substring(0, 4)
+      + "-"
+      + orig.substring(4, 6)
+      + "-"
+      + orig.substring(6, 11)
+      + ":"
+      + orig.substring(11, 13)
+      + ":"
+      + orig.substring(13, 15)
+      + ".000Z";
+    return sb;
   }
 
 //      @Test
@@ -208,11 +209,33 @@ public class PointTest {
 
   }
 
-  @ParameterizedTest
-  @ValueSource(booleans =  {true, false})
-  void testKeepPoints(boolean retainPoints) throws Exception {
+  private static class TestCase {
+    private final boolean keepPoints;
+    private final String file;
+    private final Class<? extends Geometry> expectedGeometryClass;
+    private final MultiPoint expectedPoints;
 
-    MultiPoint expectedPoints = geometryFactory.createMultiPointFromCoords(new Coordinate[]{
+    private TestCase(boolean keepPoints, String file, Class<? extends Geometry> expectedGeometryClass,
+      MultiPoint expectedPoints) {
+      this.keepPoints = keepPoints;
+      this.file = file;
+      this.expectedGeometryClass = expectedGeometryClass;
+      this.expectedPoints = expectedPoints;
+    }
+
+    @Override
+    public String toString() {
+      return "TestCase{" +
+        "keepPoints=" + keepPoints +
+        ", file='" + file + '\'' +
+        ", expectedGeometryClass=" + expectedGeometryClass +
+        ", expectedPoints=" + expectedPoints +
+        '}';
+    }
+  }
+
+  private static List<TestCase> keepPointsTestCases() {
+    MultiPoint expectedLineStringPoints = geometryFactory.createMultiPointFromCoords(new Coordinate[]{
       new Coordinate(-40, 40),
       new Coordinate(-70, 40),
       new Coordinate(-87, 45),
@@ -221,13 +244,34 @@ public class PointTest {
       new Coordinate(-90, 30.1),
     });
 
+
+    MultiPoint expectedPointPoints = geometryFactory.createMultiPointFromCoords(new Coordinate[]{
+      new Coordinate(48.37085, 122.87109)
+    });
+
+    return List.of(
+      new TestCase(true,"src/test/resources/points_data_1.csv", MultiLineString.class, expectedLineStringPoints),
+      new TestCase(false,"src/test/resources/points_data_1.csv", MultiLineString.class, expectedLineStringPoints),
+      new TestCase(true,"src/test/resources/points_data_2.csv", Point.class, expectedPointPoints),
+      new TestCase(false,"src/test/resources/points_data_2.csv", Point.class, expectedPointPoints)
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("keepPointsTestCases")
+  void testKeepPoints(TestCase testCase) throws Exception {
+    boolean retainPoints = testCase.keepPoints;
+    String file = testCase.file;
+    Class<? extends Geometry> expectedGeometryClass = testCase.expectedGeometryClass;
+    MultiPoint expectedPoints = testCase.expectedPoints;
+
     GeometrySimplifier geometrySimplifier = new GeometrySimplifier(0.0001);
     ObjectMapper objectMapper = new ObjectMapper();
 
     ByteArrayOutputStream geoJsonOut = new ByteArrayOutputStream();
     try (
       JsonGenerator jsonGenerator = objectMapper.getFactory().createGenerator(geoJsonOut);
-      Stream<String> inputLines = Files.lines(Paths.get("src/test/resources/points_data.csv"));
+      Stream<String> inputLines = Files.lines(Paths.get(file))
     ) {
 
       GeoJsonMultiLineWriter lineWriter = new GeoJsonMultiLineWriter(jsonGenerator, 5);
@@ -296,13 +340,13 @@ public class PointTest {
         GeometryCollection geometryCollection = assertInstanceOf(GeometryCollection.class, geometry);
 
         assertEquals(2, geometryCollection.getNumGeometries());
-        MultiLineString multiLineString = assertInstanceOf(MultiLineString.class, geometryCollection.getGeometryN(0));
-        assertFalse(multiLineString.contains(expectedPoints));
+        Geometry primaryGeometry = assertInstanceOf(expectedGeometryClass, geometryCollection.getGeometryN(0));
+        assertFalse(primaryGeometry.contains(expectedPoints));
         MultiPoint multiPoint = assertInstanceOf(MultiPoint.class, geometryCollection.getGeometryN(1));
         assertTrue(multiPoint.contains(expectedPoints));
         assertEquals(multiPoint.getNumPoints(), expectedPoints.getNumPoints());
       } else {
-        assertInstanceOf(MultiLineString.class, geometry);
+        assertInstanceOf(expectedGeometryClass, geometry);
         assertFalse(geometry.contains(expectedPoints));
       }
     };

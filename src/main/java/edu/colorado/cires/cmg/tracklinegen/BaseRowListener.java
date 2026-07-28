@@ -434,11 +434,22 @@ public class BaseRowListener<T extends DataRow> implements RowListener<T> {
         writeFinalSegments(segments);
         isArray = true;
       } else if (count == 1) {
+        if (retainPoints) {
+          lineWriter.startCollection();
+          isArray = true;
+        } else {
+          lineWriter.startFeature();
+        }
+
         lineWriter.startPoint();
         started = true;
         incrementSimplifiedPointCount();
         PointState pointState = segments.get(0).get(0);
         writeCoordinate(pointState.getPoint().getCoordinate());
+
+        if (retainPoints) {
+          lineWriter.endPoint();
+        }
       } else {
         startGeometry();
         isArray = true;
